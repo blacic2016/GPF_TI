@@ -1,0 +1,23 @@
+{
+    "admin": {
+        "username": "admin",
+        "fullname": "Administrador Principal de Infraestructura",
+        "password_hash": "scrypt:32768:8:1$6HWlDIN6nkHDhlE4$e0e78335a450e2f9b083f24cc43062c00de28e25e39495fc9e626271c36282eeca3825233082e74225b9737fccd7eaea5ab42154ac7778263cb536322ecb2bba",
+        "role": "ADMIN",
+        "active": true
+    },
+    "operador": {
+        "username": "operador",
+        "fullname": "T\u00e9cnico de Despliegue POS",
+        "password_hash": "scrypt:32768:8:1$4oZOwbvAeijmutWV$859317de4ea1781d04de6ae38d8e876e5f96b58c9066a0700e225cb350f1f7b607b6cf0879f868159ae5cf611f850bd024f09c6712244319014bf8ce40a11c95",
+        "role": "OPERATOR",
+        "active": true
+    },
+    "auditor": {
+        "username": "auditor",
+        "fullname": "Auditor de Procesos de Negocio",
+        "password_hash": "scrypt:32768:8:1$FoOmbsYyVe8OZarr$b8c9d6870f99d9f05d1c52842e7c9d43f8f4432ffc81d38afb01be7315b451f61a9e2defce3a020caa128ce111bc6787257486051cafca54a3065f78d46acc83",
+        "role": "AUDITOR",
+        "active": true
+    }
+}

@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeoPOS Orchestrator | Enterprise Provisioning Suite</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="nav-brand">
+      <div class="brand-icon">⚡</div>
+      <div>
+        <h1 class="brand-title">GeoPOS Orchestrator</h1>
+        <p class="brand-subtitle">Plataforma de Aprovisionamiento y Despliegue Automatizado</p>
+      </div>
+    </div>
+
+    <div class="nav-status">
+      <div class="status-badge" id="badgeMicroservice">
+        <span class="status-dot dot-cyan"></span>
+        <span id="textMicroservice">Microservicio 5001: Activo</span>
+      </div>
+      <div class="status-badge" id="badgeMode">
+        <span class="status-dot dot-cyan" id="dotMode"></span>
+        <span id="textMode">Modo: Simulación</span>
+      </div>
+      <button class="btn btn-secondary" id="btnToggleSimMode" style="padding:4px 10px; font-size:0.75rem; border-color:var(--accent-cyan); color:var(--accent-cyan);">
+        🔄 Alternar Modo Real / Simulación
+      </button>
+      <div class="status-badge" id="badgeDb">
+        <span class="status-dot dot-green"></span>
+        <span>MySQL 3306: Conectado</span>
+      </div>
+      <div class="status-badge" id="badgeOracle">
+        <span class="status-dot dot-amber"></span>
+        <span id="textOracle">Oracle ERP: Standby</span>
+      </div>
+
+      <div class="user-profile" id="userProfileNav">
+        <span id="userNameNav" style="font-size:0.85rem; font-weight:600;">Invitado</span>
+        <span class="role-tag role-operator" id="userRoleNav">OPERATOR</span>
+        <button class="btn btn-secondary" id="btnAuthAction" style="padding:4px 10px; font-size:0.75rem;">Ingresar</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- TAB CONTAINER -->
+  <main class="tab-container">
+    <nav class="tabs-nav">
+      <button class="tab-btn active" data-tab="tab-flow">
+        <span>🗺️</span> 1. Flujo Macro & Compuertas
+      </button>
+      <button class="tab-btn" data-tab="tab-deploy">
+        <span>🚀</span> 2. Despliegue en Lote (Bulk) & Unitario
+      </button>
+      <button class="tab-btn" data-tab="tab-audit">
+        <span>⚖️</span> 3. Matriz de Reconciliación (Local vs POS)
+      </button>
+      <button class="tab-btn" data-tab="tab-config">
+        <span>⚙️</span> 4. Variables de Entorno (.env en Vivo)
+      </button>
+      <button class="tab-btn" data-tab="tab-users">
+        <span>👥</span> 5. Gestión de Usuarios & Roles
+      </button>
+    </nav>
+
+    <!-- ================= TAB 1: FLUJO MACRO ================= -->
+    <section class="tab-pane active" id="tab-flow">
+      <div class="panel" style="margin-bottom: 1.5rem;">
+        <div class="panel-header">
+          <h2 class="panel-title"><span>📐</span> Arquitectura del Proceso Macro (De Cero a Certificado)</h2>
+          <span class="status-badge"><span class="status-dot dot-cyan"></span> 8 Fases Secuenciales</span>
+        </div>
+        <p style="color:var(--text-secondary); font-size:0.88rem; margin-bottom:1rem;">
+          El levantamiento de un POS desde cero requiere un flujo continuo pero estrictamente auditado. Cada fase cuenta con una <strong>Compuerta de Seguridad (Security Gate)</strong> no negociable para autorizar el paso a la siguiente etapa, evitando corrupción de esquemas, fallos de conectividad o duplicidades fiscales en facturación electrónica.
+        </p>
+
+        <!-- FLOW VISUALIZER PIPELINE -->
+        <div style="display:flex; gap:8px; overflow-x:auto; padding:10px 0; margin-bottom:1.5rem;">
+          <div style="flex:1; min-width:140px; padding:12px; background:rgba(0,240,255,0.06); border:1px solid rgba(0,240,255,0.3); border-radius:8px; text-align:center;">
+            <div style="font-size:0.7rem; color:var(--accent-cyan); font-weight:700;">FASE 0</div>
+            <div style="font-size:0.8rem; font-weight:600; margin-top:4px;">Pre-flight Checks</div>
+            <div style="font-size:0.65rem; color:#94a3b8; margin-top:4px;">SSH + Ping + Sockets</div>
+          </div>
+          <div style="flex:1; min-width:140px; padding:12px; background:rgba(168,85,247,0.06); border:1px solid rgba(168,85,247,0.3); border-radius:8px; text-align:center;">
+            <div style="font-size:0.7rem; color:#c084fc; font-weight:700;">FASE 1</div>
+            <div style="font-size:0.8rem; font-weight:600; margin-top:4px;">Repo Central</div>
+            <div style="font-size:0.65rem; color:#94a3b8; margin-top:4px;">SCP Dumps y Tar</div>
+          </div>
+          <div style="flex:1; min-width:140px; padding:12px; background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; text-align:center;">
+            <div style="font-size:0.7rem; color:#94a3b8; font-weight:700;">FASE 2</div>
+            <div style="font-size:0.8rem; font-weight:600; margin-top:4px;">FS & Gnome</div>
+            <div style="font-size:0.65rem; color:#94a3b8; margin-top:4px;">Directorios + Accesos</div>
+          </div>
+          <div style="flex:1; min-width:140px; padding:12px; background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; text-align:center;">
+            <div style="font-size:0.7rem; color:#94a3b8; font-weight:700;">FASE 3</div>
+            <div style="font-size:0.8rem; font-weight:600; margin-top:4px;">GeoConfigurator</div>
+            <div style="font-size:0.65rem; color:#94a3b8; margin-top:4px;">Terminal ID Unificado</div>
+          </div>
+          <div style="flex:1; min-width:140px; padding:12px; background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; text-align:center;">
+            <div style="font-size:0.7rem; color:#94a3b8; font-weight:700;">FASE 4</div>
+            <div style="font-size:0.8rem; font-weight:600; margin-top:4px;">GeoPOS & Epson</div>
+            <div style="font-size:0.65rem; color:#94a3b8; margin-top:4px;">Symlink Current</div>
+          </div>
+          <div style="flex:1; min-width:140px; padding:12px; background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.3); border-radius:8px; text-align:center;">
+            <div style="font-size:0.7rem; color:var(--accent-emerald); font-weight:700;">FASE 5</div>
+            <div style="font-size:0.8rem; font-weight:600; margin-top:4px;">MySQL & Dumps</div>
+            <div style="font-size:0.65rem; color:#94a3b8; margin-top:4px;">239 Tablas + IVA 15%</div>
+          </div>
+          <div style="flex:1; min-width:140px; padding:12px; background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; text-align:center;">
+            <div style="font-size:0.7rem; color:#94a3b8; font-weight:700;">FASE 6</div>
+            <div style="font-size:0.8rem; font-weight:600; margin-top:4px;">Pinpad & Cron</div>
+            <div style="font-size:0.65rem; color:#94a3b8; margin-top:4px;">3 Tareas Crontab</div>
+          </div>
+          <div style="flex:1; min-width:140px; padding:12px; background:rgba(245,158,11,0.06); border:1px solid rgba(245,158,11,0.3); border-radius:8px; text-align:center;">
+            <div style="font-size:0.7rem; color:var(--accent-amber); font-weight:700;">FASE 7</div>
+            <div style="font-size:0.8rem; font-weight:600; margin-top:4px;">SRI & Secuencias</div>
+            <div style="font-size:0.65rem; color:#94a3b8; margin-top:4px;">Kill -9 + Max+500</div>
+          </div>
+          <div style="flex:1; min-width:140px; padding:12px; background:rgba(16,185,129,0.1); border:1px solid var(--accent-emerald); border-radius:8px; text-align:center;">
+            <div style="font-size:0.7rem; color:var(--accent-emerald); font-weight:700;">FASE 8</div>
+            <div style="font-size:0.8rem; font-weight:600; margin-top:4px;">Reconciliación</div>
+            <div style="font-size:0.65rem; color:#94a3b8; margin-top:4px;">100% Paridad</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DETALLE DE CADA FASE CON SUS COMPUERTAS -->
+      <div class="panel">
+        <div class="panel-header">
+          <h3 class="panel-title"><span>📋</span> Especificación de Fases y Criterios de Aceptación</h3>
+        </div>
+        <div class="phases-timeline" id="phasesDetailContainer">
+          <!-- Renderizado dinámico vía JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 2: DESPLIEGUE EN LOTE & UNITARIO ================= -->
+    <section class="tab-pane" id="tab-deploy">
+      <div class="grid-2">
+        <!-- FORMULARIO DE LANZAMIENTO -->
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title"><span>🚀</span> Iniciar Despliegue de POS</h2>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-secondary" id="btnModeSingle" style="padding:4px 10px; font-size:0.75rem;">Unitario</button>
+              <button class="btn btn-primary" id="btnModeBulk" style="padding:4px 10px; font-size:0.75rem;">Lote (Bulk 5 POS)</button>
+            </div>
+          </div>
+
+          <!-- FORMULARIO UNITARIO -->
+          <div id="formSingleView">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div class="form-group">
+                <label class="form-label">Unidad de Negocio</label>
+                <select class="form-control" id="deployUN">
+                  <option value="FYBECA">FYBECA</option>
+                  <option value="SANASANA">SANA SANA</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">ID del Local</label>
+                <input type="text" class="form-control" id="deployLocalId" value="901">
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div class="form-group">
+                <label class="form-label">Número de POS</label>
+                <input type="number" class="form-control" id="deployPosNum" value="1">
+              </div>
+              <div class="form-group">
+                <label class="form-label">IP POS Destino</label>
+                <input type="text" class="form-control" id="deployPosIp" value="10.108.0.15">
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div class="form-group">
+                <label class="form-label">IP Servidor Local (MySQL)</label>
+                <input type="text" class="form-control" id="deployLocalIp" value="10.108.0.101">
+              </div>
+              <div class="form-group">
+                <label class="form-label">IP Pinpad</label>
+                <input type="text" class="form-control" id="deployPinpadIp" value="10.121.112.81">
+              </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:1rem;">
+              <button class="btn btn-primary" id="btnStartWizard" style="background:linear-gradient(135deg, #f59e0b, #d97706); color:#fff; font-weight:700;">
+                <span>🧙‍♂️</span> Iniciar Asistente Paso a Paso (Con Popups en Vivo)
+              </button>
+              <button class="btn btn-secondary" id="btnStartSingle" style="color:var(--text-primary);">
+                <span>⚡</span> Despliegue Directo Continuo (Sin Pausas)
+              </button>
+            </div>
+          </div>
+
+          <!-- FORMULARIO BULK -->
+          <div id="formBulkView" style="display:none;">
+            <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:12px;">
+              Orquestación secuencial en lote: El sistema iniciará con el primer POS, completará y validará todas sus compuertas de seguridad, y al certificarse avanzará al siguiente POS automáticamente.
+            </p>
+            <div class="table-responsive" style="margin-bottom:12px;">
+              <table class="data-table" id="bulkPresetTable">
+                <thead>
+                  <tr>
+                    <th>POS #</th>
+                    <th>IP Destino</th>
+                    <th>Cadena</th>
+                    <th>Pinpad IP</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody id="bulkPresetBody">
+                  <!-- Llenado dinámico -->
+                </tbody>
+              </table>
+            </div>
+            <button class="btn btn-primary" id="btnStartBulk" style="width:100%;">
+              <span>🔥</span> Iniciar Despliegue del Lote (Secuencial 1 a 1)
+            </button>
+          </div>
+        </div>
+
+        <!-- COLA ACTIVA Y COMPUERTA MANUAL -->
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title"><span>📊</span> Monitoreo en Tiempo Real</h2>
+            <span class="status-badge" id="lblBulkProgress">0 / 0 Completados</span>
+          </div>
+
+          <div id="activeJobCard" style="background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius:8px; padding:12px; margin-bottom:1rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <span id="activeJobName" style="font-weight:700; color:var(--accent-cyan);">Sin despliegues en curso</span>
+                <div id="activeJobSub" style="font-size:0.75rem; color:var(--text-muted);">Seleccione un POS o inicie el lote</div>
+              </div>
+              <span class="phase-status-pill status-pending" id="activeJobPill">IDLE</span>
+            </div>
+            <div style="width:100%; height:6px; background:rgba(255,255,255,0.08); border-radius:3px; margin:10px 0; overflow:hidden;">
+              <div id="activeJobProgressBar" style="width:0%; height:100%; background:linear-gradient(90deg, var(--accent-cyan), var(--accent-purple)); transition:width 0.4s ease;"></div>
+            </div>
+            <div id="activeJobStepDesc" style="font-size:0.78rem; color:var(--text-secondary); font-family:var(--font-mono);">Fase actual: Ninguna</div>
+          </div>
+
+          <!-- COMPUERTA DE SEGURIDAD EN ESPERA (INTERACTIVA) -->
+          <div id="gateApprovalBox" style="display:none; background:rgba(245,158,11,0.1); border:1px solid var(--accent-amber); border-radius:8px; padding:12px; margin-bottom:1rem;">
+            <div style="display:flex; align-items:center; gap:8px; color:var(--accent-amber); font-weight:700; font-size:0.85rem;">
+              <span>⚠️</span> COMPUERTA DE SEGURIDAD REQUIERE REVISIÓN
+            </div>
+            <p id="gateApprovalText" style="font-size:0.8rem; color:var(--text-primary); margin:6px 0 10px;">
+              Comprobación pendiente de autorización manual para avanzar.
+            </p>
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-success" id="btnApproveGate" style="padding:6px 12px; font-size:0.75rem;">Aprobar y Continuar</button>
+              <button class="btn btn-danger" id="btnRejectGate" style="padding:6px 12px; font-size:0.75rem;">Detener Proceso</button>
+            </div>
+          </div>
+
+          <!-- CONSOLA DE LOGS EN VIVO -->
+          <div class="terminal-window">
+            <div class="terminal-header">
+              <div class="terminal-controls">
+                <span class="term-btn term-red"></span>
+                <span class="term-btn term-yellow"></span>
+                <span class="term-btn term-green"></span>
+              </div>
+              <span>Terminal de Eventos SSH & BDD</span>
+              <span id="logCounter" style="font-size:0.7rem;">0 eventos</span>
+            </div>
+            <div class="terminal-body" id="terminalLogs">
+              <div class="log-line log-info">[SISTEMA] Motor de orquestación preparado. Esperando instrucción...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 3: MATRIZ DE RECONCILIACIÓN ================= -->
+    <section class="tab-pane" id="tab-audit">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title"><span>⚖️</span> Matriz de Validación Cruzada (Fase 8: Certificación de Paridad)</h2>
+            <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:4px;">
+              Comparativa SQL en tiempo real entre el Servidor Central del Local y la Base Local del POS recién levantado.
+            </p>
+          </div>
+          <button class="btn btn-primary" id="btnRunAudit">
+            <span>🔄</span> Ejecutar Reconciliación en Vivo
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Módulo Evaluado</th>
+                <th>Datos Servidor Local</th>
+                <th>Datos POS Desplegado</th>
+                <th>Discrepancia</th>
+                <th>Compuerta de Calidad</th>
+              </tr>
+            </thead>
+            <tbody id="reconciliationBody">
+              <!-- Cargado dinámicamente -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 4: VARIABLES EN VIVO ================= -->
+    <section class="tab-pane" id="tab-config">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title"><span>⚙️</span> Variables de Entorno & Parámetros en Vivo (.env)</h2>
+            <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:4px;">
+              Modifique los parámetros operativos en tiempo de ejecución. Los cambios aplican de inmediato en los próximos despliegues sin reiniciar la plataforma.
+            </p>
+          </div>
+          <button class="btn btn-success" id="btnSaveConfig">
+            <span>💾</span> Guardar Parámetros en Caliente
+          </button>
+        </div>
+
+        <div class="grid-3" id="configGridContainer">
+          <!-- Renderizado dinámico de campos de configuración -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 5: GESTIÓN DE USUARIOS ================= -->
+    <section class="tab-pane" id="tab-users">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title"><span>👥</span> Control de Acceso, Usuarios y Roles (RBAC)</h2>
+            <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:4px;">
+              Administre técnicos y auditores con contraseñas seguras y permisos diferenciados.
+            </p>
+          </div>
+          <button class="btn btn-primary" id="btnOpenNewUserModal">
+            <span>➕</span> Crear Nuevo Usuario
+          </button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Nombre Completo</th>
+                <th>Rol Asignado</th>
+                <th>Descripción del Rol</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <!-- Llenado dinámico -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL DE LOGIN -->
+  <div class="modal-overlay" id="loginModal">
+    <div class="modal-content">
+      <div style="text-align:center; margin-bottom:1.5rem;">
+        <div class="brand-icon" style="margin:0 auto 12px; width:48px; height:48px; font-size:1.4rem;">⚡</div>
+        <h2 style="font-size:1.2rem; font-weight:800;">Acceso a GeoPOS Orchestrator</h2>
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">Ingrese sus credenciales de infraestructura</p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Usuario</label>
+        <input type="text" class="form-control" id="loginUsername" value="admin">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contraseña</label>
+        <input type="password" class="form-control" id="loginPassword" value="AdminGeo2026!">
+      </div>
+
+      <div style="margin-bottom:1rem; padding:8px; background:rgba(255,255,255,0.03); border-radius:6px; font-size:0.75rem; color:var(--text-muted);">
+        <strong>Cuentas de prueba:</strong><br>
+        • <code>admin</code> / <code>AdminGeo2026!</code> (Control total)<br>
+        • <code>operador</code> / <code>Operador2026!</code> (Despliegues y Compuertas)<br>
+        • <code>auditor</code> / <code>Auditor2026!</code> (Solo lectura)
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-secondary" id="btnCloseLogin" style="flex:1;">Cancelar</button>
+        <button class="btn btn-primary" id="btnSubmitLogin" style="flex:1;">Iniciar Sesión</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CREAR USUARIO -->
+  <div class="modal-overlay" id="userModal">
+    <div class="modal-content">
+      <h3 style="font-size:1.1rem; font-weight:700; margin-bottom:1rem;">Nuevo Usuario del Sistema</h3>
+      <div class="form-group">
+        <label class="form-label">Nombre de Usuario (Login)</label>
+        <input type="text" class="form-control" id="newUsername" placeholder="ej. jtorres">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nombre Completo</label>
+        <input type="text" class="form-control" id="newFullname" placeholder="ej. Juan Torres">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contraseña</label>
+        <input type="password" class="form-control" id="newPassword" placeholder="Mínimo 6 caracteres">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Rol de Seguridad</label>
+        <select class="form-control" id="newRole">
+          <option value="OPERATOR">Operador de Despliegue (OPERATOR)</option>
+          <option value="ADMIN">Administrador de Infraestructura (ADMIN)</option>
+          <option value="AUDITOR">Auditor de Calidad (AUDITOR)</option>
+        </select>
+      </div>
+      <div style="display:flex; gap:10px; margin-top:1.2rem;">
+        <button class="btn btn-secondary" id="btnCloseUserModal" style="flex:1;">Cancelar</button>
+        <button class="btn btn-primary" id="btnSubmitNewUser" style="flex:1;">Crear Usuario</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL ASISTENTE INTERACTIVO PASO A PASO (POPUPS EN VIVO) -->
+  <div class="modal-overlay" id="stepWizardModal">
+    <div class="modal-content" style="max-width: 620px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--border-color); padding-bottom:8px;">
+        <div>
+          <span class="phase-status-pill status-running" id="wizardPhaseBadge">FASE 0 DE 8</span>
+          <h3 style="font-size:1.15rem; font-weight:700; margin-top:4px;" id="wizardPhaseTitle">Pre-flight Checks</h3>
+        </div>
+        <button class="btn btn-secondary" id="btnCloseWizardModal" style="padding:4px 8px; font-size:0.8rem;">✕</button>
+      </div>
+
+      <p id="wizardPhaseDesc" style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:12px;">
+        Configure y verifique los parámetros antes de disparar las acciones en el equipo destino.
+      </p>
+
+      <div id="wizardFieldsContainer" style="max-height:340px; overflow-y:auto; padding-right:6px; margin-bottom:12px;">
+        <!-- Inyección dinámica de campos del paso -->
+      </div>
+
+      <div id="wizardGateBox" style="background:rgba(168,85,247,0.1); border:1px solid rgba(168,85,247,0.3); border-radius:8px; padding:10px; margin-bottom:14px;">
+        <div style="font-size:0.75rem; color:#d8b4fe; font-weight:700; font-family:var(--font-mono);">
+          🔒 COMPUERTA DE SEGURIDAD A EVALUAR:
+        </div>
+        <div id="wizardGateRule" style="font-size:0.8rem; color:#fff; margin-top:4px;">
+          Regla: Sockets 22 y 3306 activos con respuesta < 2000ms.
+        </div>
+      </div>
+
+      <div id="wizardStatusAlert" style="display:none; padding:8px 12px; border-radius:6px; font-size:0.8rem; margin-bottom:12px;"></div>
+
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-secondary" id="btnCancelWizard" style="flex:1;">Pausar / Salir</button>
+        <button class="btn btn-primary" id="btnExecuteStep" style="flex:2;">
+          <span>⚡</span> Ejecutar Este Paso y Validar Compuerta
+        </button>
+        <button class="btn btn-success" id="btnNextStep" style="flex:2; display:none;">
+          <span>Avanzar al Siguiente Paso ➔</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

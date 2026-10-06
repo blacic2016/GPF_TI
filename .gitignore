@@ -3,6 +3,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Environment & Secrets
+.env
+*.env
+!.env.example
+
 # Logs
 *.log
 SYNAPSE_ORQ/logs/*
