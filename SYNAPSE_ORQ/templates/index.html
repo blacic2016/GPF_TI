@@ -1,0 +1,2064 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYNAPSE-ORQ - Plataforma Unificada de Automatización & Outlook IA</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        /* Transición suave para la barra lateral */
+        #main-sidebar { transition: width 0.3s ease-in-out; }
+        .sidebar-collapsed .sidebar-label { display: none; }
+        .sidebar-collapsed .sidebar-header-text { display: none; }
+        .sidebar-collapsed { width: 5rem !important; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-row overflow-x-hidden">
+
+    <!-- BARRA NAVEGACIÓN LATERAL IZQUIERDA DESPLEGABLE (SIDEBAR) -->
+    <aside id="main-sidebar" class="w-64 bg-slate-900/95 border-r border-slate-800 flex flex-col justify-between z-50 min-h-screen sticky top-0 shadow-2xl shrink-0">
+        <div>
+            <!-- Header Sidebar & Botón Toggle Colapsar -->
+            <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center space-x-3 overflow-hidden">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-xl text-white shadow-lg shadow-indigo-500/30 shrink-0">
+                        S
+                    </div>
+                    <div class="sidebar-header-text overflow-hidden">
+                        <h1 class="text-sm font-bold tracking-wide text-white truncate">SYNAPSE-ORQ</h1>
+                        <p class="text-[11px] text-indigo-400 font-mono">v3.0 Enterprise</p>
+                    </div>
+                </div>
+                <button onclick="toggleSidebar()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors" title="Colapsar / Expandir Menú">
+                    <i data-lucide="panel-left-close" id="sidebar-toggle-icon" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <!-- Menú de Navegación Lateral -->
+            <nav class="p-3 space-y-1.5">
+                <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="w-full px-3.5 py-3 text-sm font-medium rounded-xl transition-all flex items-center space-x-3 text-indigo-400 bg-indigo-600/10 border border-indigo-500/30">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5 shrink-0"></i>
+                    <span class="sidebar-label">Dashboard & Alarmas</span>
+                </button>
+
+                <button onclick="switchTab('wizard')" id="tab-btn-wizard" class="w-full px-3.5 py-3 text-sm font-medium rounded-xl transition-all flex items-center space-x-3 text-slate-400 hover:text-white hover:bg-slate-800">
+                    <i data-lucide="wand-2" class="w-5 h-5 shrink-0 text-amber-400"></i>
+                    <span class="sidebar-label font-bold text-amber-300">Creador de Monitoreo</span>
+                </button>
+
+                <button onclick="switchTab('execution')" id="tab-btn-execution" class="w-full px-3.5 py-3 text-sm font-medium rounded-xl transition-all flex items-center space-x-3 text-slate-400 hover:text-white hover:bg-slate-800">
+                    <i data-lucide="play-circle" class="w-5 h-5 shrink-0 text-emerald-400"></i>
+                    <span class="sidebar-label">Execution Script</span>
+                </button>
+
+                <button onclick="switchTab('manage')" id="tab-btn-manage" class="w-full px-3.5 py-3 text-sm font-medium rounded-xl transition-all flex items-center space-x-3 text-slate-400 hover:text-white hover:bg-slate-800">
+                    <i data-lucide="settings-2" class="w-5 h-5 shrink-0 text-indigo-400"></i>
+                    <span class="sidebar-label">Manage Monitoreo</span>
+                </button>
+
+                <button onclick="switchTab('outlook')" id="tab-btn-outlook" class="w-full px-3.5 py-3 text-sm font-medium rounded-xl transition-all flex items-center space-x-3 text-slate-400 hover:text-white hover:bg-slate-800">
+                    <i data-lucide="folder-tree" class="w-5 h-5 shrink-0"></i>
+                    <span class="sidebar-label">Explorador Outlook</span>
+                </button>
+
+                <button onclick="switchTab('scripts')" id="tab-btn-scripts" class="w-full px-3.5 py-3 text-sm font-medium rounded-xl transition-all flex items-center space-x-3 text-slate-400 hover:text-white hover:bg-slate-800">
+                    <i data-lucide="cpu" class="w-5 h-5 shrink-0"></i>
+                    <span class="sidebar-label">Script Manager & Legacy</span>
+                </button>
+
+                <button onclick="switchTab('audit')" id="tab-btn-audit" class="w-full px-3.5 py-3 text-sm font-medium rounded-xl transition-all flex items-center space-x-3 text-slate-400 hover:text-white hover:bg-slate-800">
+                    <i data-lucide="file-text" class="w-5 h-5 shrink-0"></i>
+                    <span class="sidebar-label">Auditoría & Logs</span>
+                </button>
+
+                <button onclick="switchTab('logs')" id="tab-btn-logs" class="w-full px-3.5 py-3 text-sm font-medium rounded-xl transition-all flex items-center space-x-3 text-slate-400 hover:text-white hover:bg-slate-800">
+                    <i data-lucide="terminal" class="w-5 h-5 shrink-0 text-amber-400"></i>
+                    <span class="sidebar-label font-bold text-amber-300">LOGS Sistema & MAPI</span>
+                </button>
+            </nav>
+        </div>
+
+        <!-- Footer Sidebar: Estado de MAPI y Usuario -->
+        <div class="p-3 border-t border-slate-800 space-y-3">
+            <div class="flex items-center space-x-2 px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold overflow-hidden">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+                <span class="sidebar-label truncate">MAPI Listener: ACTIVO</span>
+            </div>
+            <div class="px-2 sidebar-label text-xs">
+                <div class="font-bold text-white" id="user-display-name">Administrador Sonda</div>
+                <div class="text-slate-400">Rol: Admin NOC</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- CONTENIDOS DE LAS PESTAÑAS (PANTALLA COMPLETA) -->
+    <main class="flex-1 p-6 w-full min-h-screen overflow-x-hidden flex flex-col justify-between">
+
+        <div class="w-full space-y-6">
+
+            <!-- ========================================== -->
+            <!-- PESTAÑA 1: DASHBOARD & ALARMAS             -->
+            <!-- ========================================== -->
+            <section id="tab-dashboard" class="tab-content active space-y-6">
+                <!-- Header de Pestaña -->
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-extrabold text-white tracking-tight">Dashboard General & Telemetría en Tiempo Real</h2>
+                        <p class="text-sm text-slate-400">Arquitectura desacoplada de Microservicios Entrelazados con MAPI Listener independiente y tolerante a fallos.</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                            <span class="w-2 h-2 mr-2 rounded-full bg-emerald-400 animate-ping"></span>
+                            Mesh Status: Activo (Port 5000 / HTTP Dispatch)
+                        </span>
+                    </div>
+                </div>
+
+                <!-- PANEL VISUAL DE MICROSERVICIOS ENTRELAZADOS -->
+                <div class="glass-panel p-6 rounded-2xl border border-indigo-500/20 shadow-xl bg-slate-900/60 relative overflow-hidden">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between pb-4 mb-4 border-b border-slate-800 gap-2">
+                        <div>
+                            <h3 class="text-base font-bold text-white flex items-center space-x-2">
+                                <i data-lucide="network" class="w-5 h-5 text-indigo-400"></i>
+                                <span>Malla de Microservicios Entrelazados en Tiempo Real</span>
+                            </h3>
+                            <p class="text-xs text-slate-400">Desacoplamiento de escucha MAPI, orquestación de scripts/IA y servidor web accesible externamente.</p>
+                        </div>
+                        <div class="flex items-center space-x-3 text-xs">
+                            <span id="mesh-last-sync" class="text-slate-400 font-mono">Sincronizando...</span>
+                            <button onclick="loadMicroservicesStatus()" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-indigo-300">
+                                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+                        <!-- Conector visual central -->
+                        <div class="hidden md:block absolute top-1/2 left-[30%] right-[30%] -translate-y-1/2 h-0.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500 opacity-30 z-0"></div>
+
+                        <!-- Microservicio 1: MAPI Reader -->
+                        <div class="relative z-10 p-4 rounded-xl bg-slate-950/90 border border-slate-800 shadow-lg flex flex-col justify-between" id="card-service-mapi">
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold">MS-1 // INGESTION</span>
+                                    <span id="badge-mapi" class="flex items-center space-x-1.5 text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 font-semibold">
+                                        <span class="w-2 h-2 rounded-full bg-slate-500"></span>
+                                        <span id="text-mapi">CARGANDO...</span>
+                                    </span>
+                                </div>
+                                <h4 class="text-sm font-bold text-white flex items-center space-x-2">
+                                    <i data-lucide="mail-search" class="w-4 h-4 text-blue-400"></i>
+                                    <span>MAPI Reader Daemon</span>
+                                </h4>
+                                <p class="text-xs text-slate-400 mt-1">Escucha COM MAPI Outlook en bucle aislado. Captura correos y los despacha vía HTTP.</p>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-slate-800/80 space-y-1.5 text-[11px] font-mono">
+                                <div class="flex justify-between text-slate-400">
+                                    <span>Último Latido:</span>
+                                    <span id="time-mapi" class="text-slate-200">--</span>
+                                </div>
+                                <div class="flex justify-between text-slate-400">
+                                    <span>Intervalo de Análisis:</span>
+                                    <span id="interval-mapi" class="text-emerald-400 font-bold">Cada 5 segundos</span>
+                                </div>
+                                <div class="flex justify-between text-slate-400">
+                                    <span>Carpetas en Monitoreo:</span>
+                                    <span id="folders-count-mapi" class="text-indigo-300 font-bold">--</span>
+                                </div>
+                                <div class="text-[10px] text-slate-400 border-t border-slate-900 pt-1" id="details-mapi">Detalles: Conectando...</div>
+                            </div>
+                        </div>
+
+                        <!-- Microservicio 2: Core Execution Engine -->
+                        <div class="relative z-10 p-4 rounded-xl bg-slate-950/90 border border-slate-800 shadow-lg flex flex-col justify-between" id="card-service-core">
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20 font-bold">MS-2 // PROCESSING</span>
+                                    <span id="badge-core" class="flex items-center space-x-1.5 text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 font-semibold">
+                                        <span class="w-2 h-2 rounded-full bg-slate-500"></span>
+                                        <span id="text-core">CARGANDO...</span>
+                                    </span>
+                                </div>
+                                <h4 class="text-sm font-bold text-white flex items-center space-x-2">
+                                    <i data-lucide="cpu" class="w-4 h-4 text-purple-400"></i>
+                                    <span>Core Execution Engine</span>
+                                </h4>
+                                <p class="text-xs text-slate-400 mt-1">Endpoint HTTP <code class="text-purple-300">/api/daemon/inbound_email</code>. Ejecuta regex, handlers, n8n y traslada a <code class="text-purple-300">analizados</code>.</p>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-slate-800/80 space-y-1.5 text-[11px] font-mono">
+                                <div class="flex justify-between text-slate-400">
+                                    <span>Último Latido:</span>
+                                    <span id="time-core" class="text-slate-200">--</span>
+                                </div>
+                                <div class="flex justify-between text-slate-400">
+                                    <span>Tasa Éxito:</span>
+                                    <span id="success-rate-core" class="text-emerald-400 font-bold">100%</span>
+                                </div>
+                                <div class="text-[10px] text-slate-500 truncate" id="details-core">Motor de reglas activo</div>
+                            </div>
+                        </div>
+
+                        <!-- Microservicio 3: Web & External API -->
+                        <div class="relative z-10 p-4 rounded-xl bg-slate-950/90 border border-slate-800 shadow-lg flex flex-col justify-between" id="card-service-web">
+                            <div>
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">MS-3 // GATEWAY</span>
+                                    <span id="badge-web" class="flex items-center space-x-1.5 text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 font-semibold">
+                                        <span class="w-2 h-2 rounded-full bg-slate-500"></span>
+                                        <span id="text-web">CARGANDO...</span>
+                                    </span>
+                                </div>
+                                <h4 class="text-sm font-bold text-white flex items-center space-x-2">
+                                    <i data-lucide="globe" class="w-4 h-4 text-emerald-400"></i>
+                                    <span>Web Management API</span>
+                                </h4>
+                                <p class="text-xs text-slate-400 mt-1">Flask REST API expuesta en <code class="text-emerald-300">0.0.0.0:5000</code> para acceso remoto seguro desde la red.</p>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-slate-800/80 space-y-1.5 text-[11px] font-mono">
+                                <div class="flex justify-between text-slate-400">
+                                    <span>Último Latido:</span>
+                                    <span id="time-web" class="text-slate-200">--</span>
+                                </div>
+                                <div class="flex justify-between text-slate-400">
+                                    <span>Escuchando en:</span>
+                                    <span class="text-emerald-400 font-bold">0.0.0.0:5000</span>
+                                </div>
+                                <div class="text-[10px] text-slate-500 truncate" id="details-web">Accesible vía LAN / WAN</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tarjetas de Métricas Full Screen -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="glass-panel p-5 rounded-2xl">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Correos Procesados</p>
+                                <h3 class="text-3xl font-extrabold text-white mt-1" id="stat-total">0</h3>
+                            </div>
+                            <div class="p-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                                <i data-lucide="mail" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-5 rounded-2xl">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Ejecuciones Exitosas</p>
+                                <h3 class="text-3xl font-extrabold text-emerald-400 mt-1" id="stat-success">0</h3>
+                            </div>
+                            <div class="p-3 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                <i data-lucide="check-circle" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-5 rounded-2xl">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Fallas de Scripts</p>
+                                <h3 class="text-3xl font-extrabold text-rose-400 mt-1" id="stat-failed">0</h3>
+                            </div>
+                            <div class="p-3 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel p-5 rounded-2xl">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Alarmas Activas</p>
+                                <h3 class="text-3xl font-extrabold text-amber-400 mt-1" id="stat-alarms">0</h3>
+                            </div>
+                            <div class="p-3 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                                <i data-lucide="bell" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráfico y Alarmas -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Gráfico de Distribución -->
+                    <div class="glass-panel p-6 rounded-2xl lg:col-span-2">
+                        <h3 class="text-lg font-bold text-white mb-4 flex items-center space-x-2">
+                            <i data-lucide="pie-chart" class="w-5 h-5 text-indigo-400"></i>
+                            <span>Distribución de Ejecución por Automatización</span>
+                        </h3>
+                        <div class="h-64 flex items-center justify-center">
+                            <canvas id="chart-scripts"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Panel de Alarmas del Sistema -->
+                    <div class="glass-panel p-6 rounded-2xl flex flex-col">
+                        <h3 class="text-lg font-bold text-white mb-4 flex items-center justify-between">
+                            <span class="flex items-center space-x-2">
+                                <i data-lucide="shield-alert" class="w-5 h-5 text-amber-400"></i>
+                                <span>Alarmas Operativas</span>
+                            </span>
+                            <span class="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold" id="alarm-count-badge">0 Activas</span>
+                        </h3>
+                        <div class="space-y-3 overflow-y-auto max-h-64 flex-1 pr-1" id="alarm-list">
+                            <!-- Alarmas dinámicas -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- PESTAÑA NUEVA: CREADOR DE MONITOREO (WIZARD) -->
+            <!-- ========================================== -->
+            <section id="tab-wizard" class="tab-content space-y-6">
+                <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-6">
+                    <div>
+                        <h2 class="text-xl font-bold text-white flex items-center space-x-2">
+                            <i data-lucide="wand-2" class="w-6 h-6 text-amber-400"></i>
+                            <span>Creador de Monitoreo de Correos Outlook en Vivo</span>
+                        </h2>
+                        <p class="text-sm text-slate-400 mt-1">Crea un proyecto de monitoreo seleccionando una carpeta de Outlook, eligiendo el correo a analizar en vivo, y configurando la regla o webhook de alerta para n8n / Zabbix.</p>
+                    </div>
+
+                    <form onsubmit="wzSaveMonitoringRule(event)" class="space-y-6">
+                        <!-- ======================================================== -->
+                        <!-- PASO 1 (OBLIGATORIO): ORIGEN MAPI & CARPETAS DE BANDEJA  -->
+                        <!-- ======================================================== -->
+                        <div class="bg-slate-900/90 p-5 rounded-xl border border-indigo-500/40 space-y-4 shadow-lg">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-sm font-bold text-indigo-300 uppercase tracking-wider flex items-center space-x-2">
+                                    <span class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold">1</span>
+                                    <span>Paso 1: Nombre del Monitoreo, Cuenta Outlook & Subcarpetas de Bandeja de Entrada</span>
+                                </h3>
+                                <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full uppercase tracking-wider">Paso Obligatorio</span>
+                                <input type="hidden" id="wz-step1-enabled" value="true">
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Nombre del Monitoreo <span class="text-rose-400">*</span></label>
+                                    <input type="text" id="wz-rule-name" required placeholder="ej. Monitoreo GPF Hetrix Alertas" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Cuenta de Correo Outlook Origen (Buzón MAPI) <span class="text-rose-400">*</span></label>
+                                    <select id="wz-account-select" onchange="wzOnAccountChanged()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                                        <option value="marco.vizcaino@sonda.com">marco.vizcaino@sonda.com</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Selector exclusivo de Subcarpetas dentro de 'Bandeja de entrada' -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-800">
+                                <div>
+                                    <div class="flex justify-between items-center mb-1">
+                                        <label class="block text-xs font-semibold text-slate-300 uppercase">Subcarpetas dentro de "Bandeja de Entrada" <span class="text-rose-400">*</span></label>
+                                        <span class="text-[10px] text-indigo-400 font-mono">Solo subcarpetas internas</span>
+                                    </div>
+                                    <select id="wz-folder-select" onchange="wzOnFolderChanged()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                                        <option value="">Cargando subcarpetas de Bandeja de entrada...</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Correos en la Subcarpeta (Bajo Demanda)</label>
+                                    <div class="flex space-x-2">
+                                        <select id="wz-email-select" onchange="wzOnEmailSelected()" class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                                            <option value="">-- Clic en Ver Correos o Analizar Carpeta --</option>
+                                        </select>
+                                        <button type="button" onclick="wzFetchEmailsForFolder()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg flex items-center space-x-1 shrink-0 shadow-md transition-transform active:scale-95" title="Cargar los correos de esta subcarpeta">
+                                            <i data-lucide="mail" class="w-3.5 h-3.5"></i>
+                                            <span>Ver Correos</span>
+                                        </button>
+                                        <button type="button" onclick="wzAnalyzeFolderNow()" class="px-3.5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold rounded-lg flex items-center space-x-1 shrink-0 shadow-md transition-transform active:scale-95" title="Inspecciona los correos de la subcarpeta y traslada a la subcarpeta destino">
+                                            <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                                            <span>Analizar Carpeta</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Previsualización del Correo de la Subcarpeta -->
+                            <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5" id="wz-email-preview-card">
+                                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
+                                    <span class="text-xs font-bold text-amber-400 font-mono truncate" id="wz-preview-subject">Ningún correo seleccionado</span>
+                                    <div class="flex items-center space-x-2 text-[11px] text-slate-400">
+                                        <span id="wz-preview-sender">Remitente: N/A</span>
+                                        <span class="text-indigo-400 font-mono text-[10px]" id="wz-preview-unixtime">UnixTime ID: --</span>
+                                    </div>
+                                </div>
+                                <div id="wz-preview-attachments" class="text-[11px] hidden py-1 border-t border-slate-900"></div>
+                                <p class="text-xs text-slate-300 font-mono bg-slate-900 p-2.5 rounded border border-slate-800/80 leading-relaxed max-h-20 overflow-y-auto" id="wz-preview-body">
+                                    Selecciona una subcarpeta de la Bandeja de entrada para evaluar o analizar sus correos.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- ======================================================== -->
+                        <!-- PASO 2: ACTION (REENVÍO & ANÁLISIS DE ASUNTO / BODY / ADJ) -->
+                        <!-- ======================================================== -->
+                        <div class="bg-slate-900/90 p-5 rounded-xl border border-slate-800 space-y-4">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-sm font-bold text-indigo-300 uppercase tracking-wider flex items-center space-x-2">
+                                    <span class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold">2</span>
+                                    <span>Paso 2: ACTION (Reenvío & Análisis de Título, Body y Adjuntos)</span>
+                                </h3>
+                                <div class="flex items-center space-x-3 text-xs">
+                                    <span class="text-slate-400">Acciones configurables</span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- 2.1 Reenvío de Correo -->
+                                <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-3">
+                                    <div class="flex items-center justify-between">
+                                        <label class="flex items-center space-x-2 cursor-pointer">
+                                            <input type="checkbox" id="wz-forward-enabled" onchange="wzToggleForwardingOptions()" class="w-4 h-4 rounded text-indigo-500 bg-slate-900 border-slate-700">
+                                            <span class="text-xs font-bold text-white">1. Reenviar Correo de Llegada</span>
+                                        </label>
+                                        <span class="text-[10px] text-indigo-300 font-mono">Reenvío MAPI</span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-400">Reenvía automáticamente el correo detectado a otro correo de tu elección.</p>
+
+                                    <div id="wz-forward-options" class="space-y-2 hidden pt-2 border-t border-slate-800">
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Correo Electrónico Destino</label>
+                                            <input type="email" id="wz-forward-email-target" placeholder="ej. operador.noc@sonda.com" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Momento del Reenvío</label>
+                                            <select id="wz-forward-timing" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+                                                <option value="AFTER_ANALYSIS">Al finalizar el análisis (Satisfactorio)</option>
+                                                <option value="BEFORE_ANALYSIS">Apenas llegue el correo a la carpeta</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 2.2 Análisis de Archivos Adjuntos -->
+                                <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-3">
+                                    <div class="flex items-center justify-between">
+                                        <label class="flex items-center space-x-2 cursor-pointer">
+                                            <input type="checkbox" id="wz-attachment-enabled" onchange="wzToggleAttachmentOptions()" class="w-4 h-4 rounded text-amber-500 bg-slate-900 border-slate-700">
+                                            <span class="text-xs font-bold text-white">2. Análisis de Archivos Adjuntos</span>
+                                        </label>
+                                        <span class="text-[10px] text-amber-300 font-mono">Attachments</span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-400">Evalúa si el correo contiene archivos adjuntos y filtra por extensión o nombre.</p>
+
+                                    <div id="wz-attachment-options" class="space-y-2 hidden pt-2 border-t border-slate-800">
+                                        <div>
+                                            <label class="block text-[11px] font-semibold text-slate-400 uppercase mb-1">Filtro de Extensión o Nombre (Regex)</label>
+                                            <input type="text" id="wz-attachment-pattern" placeholder="ej. .*\.(pdf|xlsx|csv|log)$" value=".*\.(pdf|xlsx|csv)$" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500 font-mono">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 2.3 Función / Script a Ejecutar y Parámetros -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-slate-800">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Función / Script a Ejecutar <span class="text-rose-400">*</span></label>
+                                    <select id="wz-handler-code" class="w-full bg-slate-950 border border-indigo-500/50 rounded-lg px-3 py-2 text-xs text-indigo-300 font-bold focus:outline-none focus:border-indigo-400">
+                                        <option value="dynamic_rule_handler">⭐ Motor Dinámico de Reglas (Extraer Variables Body/Título)</option>
+                                        <option value="gpf_hetrix_handler">GPF Hetrix Handler (Zabbix + MantisBT)</option>
+                                        <option value="gpf_totem_handler">GPF Totem Handler (Alertas Totems)</option>
+                                        <option value="gpf_networker_handler">GPF Networker Handler (Respaldos)</option>
+                                        <option value="ai_sonda_handler">AI Sonda Handler (n8n Webhook / Gemini)</option>
+                                        <option value="antigravity_handler">Antigravity Handler (Telemetría)</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Búsqueda en Título / Asunto (Regex)</label>
+                                    <input type="text" id="wz-subject-pattern" required value=".*" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white font-mono text-xs">
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Extracción de Variables en Cuerpo (Body JSON)</label>
+                                    <textarea id="wz-extraction-rules" rows="1" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs font-mono text-indigo-300 focus:outline-none focus:border-indigo-500">{"url_servicio": "https?://\\S+", "estado": "(DOWN|UP)"}</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ======================================================== -->
+                        <!-- PASO 3: ENVÍO DE ALERTAS (ZABBIX, MANTIS, N8N, WEBHOOK) -->
+                        <!-- ======================================================== -->
+                        <div class="bg-slate-900/90 p-5 rounded-xl border border-slate-800 space-y-4">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-sm font-bold text-indigo-300 uppercase tracking-wider flex items-center space-x-2">
+                                    <span class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold">3</span>
+                                    <span>Paso 3: Envío de Alerta Basada en las Búsquedas del Paso 2</span>
+                                </h3>
+                                <label class="flex items-center space-x-1.5 cursor-pointer bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
+                                    <input type="checkbox" id="wz-step3-enabled" checked class="w-3.5 h-3.5 rounded text-emerald-500 bg-slate-900 border-slate-700">
+                                    <span class="text-[11px] font-bold text-emerald-300">Paso 3 Activado</span>
+                                </label>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Destino de la Alerta / Derivación</label>
+                                    <select id="wz-alarm-action" onchange="wzOnAlarmActionChanged()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white">
+                                        <option value="ZABBIX_ALARM">Generación de Alerta / Evento hacia Zabbix Server</option>
+                                        <option value="MANTIS_TICKET">Envío de reporte a MantisBT (Ticket de Incidencia)</option>
+                                        <option value="N8N_WEBHOOK">Disparador de Webhook hacia n8n (Flujo Cognitivo / IA)</option>
+                                        <option value="EXTERNAL_WEBHOOK">Otro Aplicativo (Webhook HTTP REST Personalizado)</option>
+                                        <option value="LOG_ONLY">Solo Registro en Base de Datos y Logs</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <!-- Bloque dinámico según destino -->
+                                    <div id="wz-block-n8n" class="space-y-1 hidden">
+                                        <label class="block text-xs font-semibold text-slate-300 uppercase">URL Webhook n8n</label>
+                                        <input type="text" id="wz-n8n-url" value="http://172.32.1.60:5678/webhook/sonda-email-ai" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white font-mono">
+                                    </div>
+                                    <div id="wz-block-zabbix" class="space-y-1">
+                                        <label class="block text-xs font-semibold text-slate-300 uppercase">Host IP / Clave Métrica Zabbix</label>
+                                        <input type="text" id="wz-zabbix-target" readonly value="172.32.1.51 / synapse.email.alert" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-emerald-400 font-mono">
+                                    </div>
+                                    <div id="wz-block-webhook" class="space-y-1 hidden">
+                                        <label class="block text-xs font-semibold text-slate-300 uppercase">URL Webhook Externo</label>
+                                        <input type="text" id="wz-external-url" placeholder="https://api.tuempresa.com/alertas" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white font-mono">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ======================================================== -->
+                        <!-- PASO 4: ORGANIZADOR DE CARPETA DESTINO                   -->
+                        <!-- ======================================================== -->
+                        <div class="bg-slate-900/90 p-5 rounded-xl border border-slate-800 space-y-4">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-sm font-bold text-indigo-300 uppercase tracking-wider flex items-center space-x-2">
+                                    <span class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold">4</span>
+                                    <span>Paso 4: Traslado Automático a Subcarpeta Interna</span>
+                                </h3>
+                                <label class="flex items-center space-x-1.5 cursor-pointer bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
+                                    <input type="checkbox" id="wz-step4-enabled" checked class="w-3.5 h-3.5 rounded text-emerald-500 bg-slate-900 border-slate-700">
+                                    <span class="text-[11px] font-bold text-emerald-300">Paso 4 Activado</span>
+                                </label>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+                                    <label class="flex items-center space-x-2 cursor-pointer">
+                                        <input type="checkbox" id="wz-move-enabled" checked class="w-4 h-4 rounded text-emerald-500 bg-slate-900 border-slate-700">
+                                        <span class="text-xs font-bold text-white">Mover el correo tras finalizar el análisis</span>
+                                    </label>
+                                    <p class="text-[11px] text-slate-400">Crea o utiliza la subcarpeta interna dentro de la carpeta elegida para mover el correo analizado.</p>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Nombre de la Subcarpeta Destino (Por Defecto: analizados)</label>
+                                    <input type="text" id="wz-target-subfolder" required value="analizados" placeholder="analizados" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-indigo-500">
+                                    <input type="hidden" id="wz-post-action" value="MOVE_ANALIZADO">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ======================================================== -->
+                        <!-- PASO 5: PERSISTENCIA EN BDD (ID ÚNICO UNIXTIME + ASUNTO) -->
+                        <!-- ======================================================== -->
+                        <div class="bg-indigo-950/40 p-5 rounded-xl border border-indigo-500/30 space-y-4">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-sm font-bold text-indigo-300 uppercase tracking-wider flex items-center space-x-2">
+                                    <span class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold">5</span>
+                                    <i data-lucide="database" class="w-4 h-4 text-indigo-400"></i>
+                                    <span>Paso 5: Persistencia Idempotente en BDD (ID Único UnixTime + Título)</span>
+                                </h3>
+                                <span class="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 font-bold">DEDUPLICACIÓN GARANTIZADA</span>
+                            </div>
+
+                            <p class="text-xs text-slate-300 leading-relaxed">
+                                Cada correo procesado se registra en SQLite (<code class="text-indigo-300">execution_logs</code>) utilizando una clave única conformada por el <strong>código UnixTime de llegada del correo</strong> y su <strong>título / asunto</strong>. De este modo, si por cualquier eventualidad el correo no se pasa a la subcarpeta analizada, el sistema sabe que ya fue atendido y evita reprocesamientos duplicados.
+                            </p>
+
+                            <div class="flex flex-col sm:flex-row justify-between items-center pt-3 border-t border-indigo-500/20 gap-3">
+                                <div class="text-[11px] text-slate-400 font-mono">
+                                    Fórmula: <span class="text-amber-300">[UNIXTIME_LLEGADA]_[TITULO_SLUG]</span>
+                                </div>
+                                <button type="submit" class="w-full sm:w-auto px-6 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm rounded-xl shadow-lg shadow-amber-500/20 flex items-center justify-center space-x-2 transition-all">
+                                    <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                                    <span>Guardar y Activar Regla de Monitoreo</span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- PESTAÑA: EXECUTION SCRIPT                  -->
+            <!-- ========================================== -->
+            <section id="tab-execution" class="tab-content space-y-6">
+                <div class="glass-panel p-6 rounded-2xl border border-slate-800">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h2 class="text-xl font-bold text-white flex items-center space-x-2">
+                                <i data-lucide="play-circle" class="w-6 h-6 text-emerald-400"></i>
+                                <span>Execution Script & Monitoreos Ejecutados</span>
+                            </h2>
+                            <p class="text-sm text-slate-400 mt-1">Registro directo de ejecuciones en vivo, scripts disparados, errores detectados y reenvíos ejecutados.</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="clearAuditLogsData()" class="px-4 py-2 bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 border border-rose-500/30 text-xs font-semibold rounded-xl flex items-center space-x-2">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                <span>Borrar Logs Ejecuciones</span>
+                            </button>
+                            <button onclick="loadExecutionLogs()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold rounded-xl flex items-center space-x-2">
+                                <i data-lucide="refresh-cw" class="w-4 h-4 text-emerald-400"></i>
+                                <span>Actualizar Ejecuciones</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-800 text-xs font-semibold text-slate-400 uppercase tracking-wider bg-slate-900/60">
+                                    <th class="py-3 px-4">Fecha / Hora</th>
+                                    <th class="py-3 px-4">ID Único (UnixTime + Asunto)</th>
+                                    <th class="py-3 px-4">Monitoreo / Script</th>
+                                    <th class="py-3 px-4">Remitente & Carpeta</th>
+                                    <th class="py-3 px-4">Asunto del Correo</th>
+                                    <th class="py-3 px-4">Estado</th>
+                                    <th class="py-3 px-4 text-right">Detalle / Log</th>
+                                </tr>
+                            </thead>
+                            <tbody id="execution-logs-body" class="divide-y divide-slate-800 text-xs">
+                                <!-- Filas dinámicas -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- PESTAÑA: MANAGE MONITOREO                  -->
+            <!-- ========================================== -->
+            <section id="tab-manage" class="tab-content space-y-6">
+                <div class="glass-panel p-6 rounded-2xl border border-slate-800">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h2 class="text-xl font-bold text-white flex items-center space-x-2">
+                                <i data-lucide="settings-2" class="w-6 h-6 text-indigo-400"></i>
+                                <span>Manage Monitoreo - Gestión de Proyectos Creados</span>
+                            </h2>
+                            <p class="text-sm text-slate-400 mt-1">Lista de proyectos y carpetas bajo monitoreo activo. <strong>El análisis y ejecución del sistema se aplica de manera exclusiva a las carpetas configuradas aquí y a las acciones definidas para cada una.</strong></p>
+                        </div>
+                        <button onclick="loadManageMonitors()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl flex items-center space-x-2">
+                            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                            <span>Refrescar Lista</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="manage-monitors-grid">
+                        <!-- Tarjetas de Monitoreos creados -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- PESTAÑA: LOGS SISTEMA & MAPI IN VIVO       -->
+            <!-- ========================================== -->
+            <section id="tab-logs" class="tab-content space-y-6">
+                <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-xl font-bold text-white flex items-center space-x-2">
+                                <i data-lucide="terminal" class="w-6 h-6 text-amber-400"></i>
+                                <span>LOGS de Análisis, Conectividad MAPI & Errores en Vivo</span>
+                            </h2>
+                            <p class="text-sm text-slate-400 mt-1">Consola forense en tiempo real. Muestra la conectividad MAPI, si ingresan o no correos a las subcarpetas, y las excepciones exactas del motor de análisis.</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <button onclick="clearSystemLogsData()" class="px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 border border-rose-500/30 text-xs font-semibold rounded-xl flex items-center space-x-1.5">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                <span>Vaciar Consola Logs</span>
+                            </button>
+                            <label class="flex items-center space-x-2 text-xs text-slate-300">
+                                <input type="checkbox" id="logs-auto-refresh" checked class="w-4 h-4 rounded text-amber-500 bg-slate-950 border-slate-700">
+                                <span>Auto-refrescar (3s)</span>
+                            </label>
+                            <button onclick="loadSystemLogs()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold rounded-xl flex items-center space-x-2 shadow-lg">
+                                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                                <span>Actualizar Logs Ahora</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono text-xs text-slate-300 leading-relaxed overflow-x-auto max-h-[600px] overflow-y-auto space-y-1 shadow-inner" id="system-logs-container">
+                        <div class="text-slate-500 text-center py-4">Cargando consola de logs del sistema...</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- PESTAÑA 2: EXPLORADOR DE OUTLOOK          -->
+            <!-- ========================================== -->
+            <section id="tab-outlook" class="tab-content space-y-6">
+                <div class="glass-panel p-6 rounded-2xl border border-slate-800">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h2 class="text-xl font-bold text-white flex items-center space-x-2">
+                                <i data-lucide="folder-git-2" class="w-6 h-6 text-indigo-400"></i>
+                                <span>Explorador de Árbol MAPI de Outlook & Enrutador de Carpetas</span>
+                            </h2>
+                            <p class="text-sm text-slate-400 mt-1">Inspecciona las subcarpetas del buzón corporativo en tiempo real, monitorea la cantidad de correos y asigna automatizaciones o motores de IA.</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div id="outlook-status-badge" class="px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center space-x-1.5">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                <span>Verificando conexión MAPI...</span>
+                            </div>
+                            <button onclick="loadOutlookTree()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-semibold rounded-xl flex items-center space-x-2">
+                                <i data-lucide="refresh-cw" class="w-4 h-4 text-indigo-400"></i>
+                                <span>Sincronizar MAPI Real</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tarjetas Informativas del Explorador -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center space-x-3">
+                            <div class="p-2.5 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                                <i data-lucide="mail-check" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <span class="text-[11px] font-bold text-slate-400 uppercase">Buzón MAPI Principal</span>
+                                <h4 class="text-xs font-mono font-bold text-indigo-300">monitoreosistemas@corporaciongpf.com</h4>
+                            </div>
+                        </div>
+                        <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center space-x-3">
+                            <div class="p-2.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                <i data-lucide="folder-tree" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <span class="text-[11px] font-bold text-slate-400 uppercase">Carpetas Monitoreadas</span>
+                                <h4 class="text-xs font-bold text-emerald-400" id="outlook-monitored-count">6 Subcarpetas Activas</h4>
+                            </div>
+                        </div>
+                        <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center space-x-3">
+                            <div class="p-2.5 rounded-lg bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                                <i data-lucide="sparkles" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <span class="text-[11px] font-bold text-slate-400 uppercase">Enrutador IA (n8n/Gemini)</span>
+                                <h4 class="text-xs font-bold text-purple-300">Activo para Correos de Sonda</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-800 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                    <th class="py-3 px-4">Ruta MAPI de la Carpeta</th>
+                                    <th class="py-3 px-4">Correos Existentes</th>
+                                    <th class="py-3 px-4">Estado del Escuchador</th>
+                                    <th class="py-3 px-4">Automatización Asignada</th>
+                                    <th class="py-3 px-4">Motor de Procesamiento</th>
+                                    <th class="py-3 px-4 text-right">Acción / Mapeo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="folder-tree-body" class="divide-y divide-slate-800 text-sm">
+                                <!-- Filas de carpetas cargadas dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- PESTAÑA 3: CONFIGURADOR & SCRIPT MANAGER   -->
+            <!-- ========================================== -->
+            <section id="tab-scripts" class="tab-content space-y-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-white flex items-center space-x-2">
+                            <i data-lucide="code" class="w-6 h-6 text-indigo-400"></i>
+                            <span>Gestor de Scripts & Inspección de Scripts Antiguos (pythonold)</span>
+                        </h2>
+                        <p class="text-sm text-slate-400 mt-1">Revisa el código original de tus 10 scripts legacy y crea nuevas reglas de análisis predefinidas.</p>
+                    </div>
+                    <button onclick="switchTab('wizard')" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold rounded-xl transition-all shadow-lg shadow-amber-500/20 flex items-center space-x-2">
+                        <i data-lucide="wand-2" class="w-4 h-4"></i>
+                        <span>Ir al Creador de Monitoreo</span>
+                    </button>
+                </div>
+
+                <!-- SECCIÓN INSPECTOR Y MACRO-PROCESO DE SCRIPTS LEGACY -->
+                <div class="glass-panel p-6 rounded-2xl border border-slate-800 space-y-6">
+                    
+                    <!-- DIAGRAMA VISUAL DEL MACRO-PROCESO UNIFICADO -->
+                    <div class="bg-slate-900/90 p-5 rounded-xl border border-slate-800">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-md font-bold text-white flex items-center space-x-2">
+                                <i data-lucide="git-merge" class="w-5 h-5 text-indigo-400"></i>
+                                <span>Diagrama del Macro-Proceso Unificado de Automatización (Análisis de 10 Scripts)</span>
+                            </h3>
+                            <span class="text-xs px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 font-semibold border border-indigo-500/30">Pipeline Estándar Enterprise</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-3" id="macro-pipeline-cards">
+                            <!-- Fases dinámicas del Macro-Proceso -->
+                        </div>
+                    </div>
+
+                    <!-- DETALLE Y CÓDIGO FUENTE DE SCRIPT SELECCIONADO -->
+                    <div>
+                        <h3 class="text-md font-bold text-white mb-3 flex items-center space-x-2">
+                            <i data-lucide="file-code-2" class="w-5 h-5 text-amber-400"></i>
+                            <span>Scripts Legacy en Disco (`c:\SYNAPSE_ORQ\pythonold\`)</span>
+                        </h3>
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <!-- Lista de archivos antiguos -->
+                            <div class="space-y-2 overflow-y-auto max-h-96 pr-1" id="legacy-files-list">
+                                <!-- Archivos dinámicos -->
+                            </div>
+                            
+                            <!-- Panel de Análisis Sintáctico y Visor de Código -->
+                            <div class="lg:col-span-2 space-y-4">
+                                <!-- Pasos analizados del script -->
+                                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center space-x-1">
+                                        <i data-lucide="activity" class="w-4 h-4 text-indigo-400"></i>
+                                        <span>Análisis de Flujo y Fases del Script Seleccionado</span>
+                                    </h4>
+                                    <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs" id="script-analysis-steps">
+                                        <div class="p-2 rounded bg-slate-900 text-slate-400">Selecciona un script para ver sus fases.</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Visor de Código Fuente -->
+                                <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex flex-col">
+                                    <div class="flex justify-between items-center mb-2 pb-2 border-b border-slate-800">
+                                        <span class="text-xs font-mono font-bold text-indigo-300" id="legacy-viewer-title">Selecciona un script legacy para inspeccionar</span>
+                                        <span class="text-xs text-slate-500 font-mono" id="legacy-viewer-size">0 KB</span>
+                                    </div>
+                                    <pre class="text-xs font-mono text-slate-300 overflow-x-auto overflow-y-auto max-h-72 leading-relaxed flex-1" id="legacy-code-content"># Haz clic en cualquier script .py de la lista para inspeccionar su código y ver el análisis visual de sus fases.</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Listado de Scripts Activos / Unificados en el Sistema -->
+                <h3 class="text-md font-bold text-white mt-8 mb-3 flex items-center space-x-2">
+                    <i data-lucide="layers" class="w-5 h-5 text-indigo-400"></i>
+                    <span>Procesos y Automatizaciones Activas en SYNAPSE-ORQ</span>
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="scripts-grid">
+                    <!-- Tarjetas dinámicas de scripts -->
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- PESTAÑA 4: AUDITORÍA DE EJECUCIONES        -->
+            <!-- ========================================== -->
+            <section id="tab-audit" class="tab-content space-y-6">
+                <div class="glass-panel p-6 rounded-2xl">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h2 class="text-xl font-bold text-white flex items-center space-x-2">
+                                <i data-lucide="history" class="w-6 h-6 text-indigo-400"></i>
+                                <span>Auditoría & Logs de Ejecución de Correos</span>
+                            </h2>
+                            <p class="text-sm text-slate-400 mt-1">Registro forense detallado de correos procesados, errores de lectura de body y respuestas de IA.</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="simulateAntigravityEmail()" class="px-4 py-2 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/40 text-xs font-semibold rounded-xl flex items-center space-x-2 shadow-lg">
+                                <i data-lucide="zap" class="w-4 h-4 text-amber-400 animate-pulse"></i>
+                                <span>Simular Correo Antigravity</span>
+                            </button>
+                            <button onclick="simulateTestEmail()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold rounded-xl flex items-center space-x-2">
+                                <i data-lucide="send" class="w-4 h-4 text-indigo-400"></i>
+                                <span>Simular Correo Genérico</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-800 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                                    <th class="py-3 px-4">Hora</th>
+                                    <th class="py-3 px-4">Remitente</th>
+                                    <th class="py-3 px-4">Asunto del Correo</th>
+                                    <th class="py-3 px-4">Script Ejecutado</th>
+                                    <th class="py-3 px-4">Estado</th>
+                                    <th class="py-3 px-4">Latencia</th>
+                                    <th class="py-3 px-4 text-right">Payload / Detalle</th>
+                                </tr>
+                            </thead>
+                            <tbody id="audit-logs-body" class="divide-y divide-slate-800 text-sm">
+                                <!-- Filas dinámicas de ejecuciones -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- FOOTER DE LA SOLUCIÓN -->
+        <footer class="mt-8 border-t border-slate-800 py-3 text-center text-xs text-slate-500">
+            SYNAPSE-ORQ Enterprise &copy; 2026 - SONDA del Ecuador S.A. | Demonio MAPI Outlook & Integración IA n8n
+        </footer>
+
+    </main>
+
+    <!-- MODAL VISOR DE CORREOS DE OUTLOOK POR CARPETA -->
+    <div id="outlook-emails-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="glass-panel w-full max-w-4xl p-6 rounded-2xl shadow-2xl border border-slate-700 relative max-h-[85vh] flex flex-col">
+            <button onclick="closeOutlookEmailsModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            <div class="mb-4">
+                <h3 class="text-lg font-bold text-white flex items-center space-x-2">
+                    <i data-lucide="mail-search" class="w-5 h-5 text-indigo-400"></i>
+                    <span id="modal-folder-title">Correos en la Carpeta MAPI de Outlook</span>
+                </h3>
+                <p class="text-xs text-slate-400">Inspección directa de mensajes capturados por SYNAPSE-ORQ y el demonio MAPI.</p>
+            </div>
+
+            <div class="overflow-y-auto flex-1 pr-1">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-800 text-xs font-semibold text-slate-400 uppercase tracking-wider sticky top-0 bg-slate-900">
+                            <th class="py-2.5 px-3">Recibido</th>
+                            <th class="py-2.5 px-3">Remitente</th>
+                            <th class="py-2.5 px-3">Asunto</th>
+                            <th class="py-2.5 px-3">Estado</th>
+                            <th class="py-2.5 px-3 text-right">Detalles</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modal-emails-body" class="divide-y divide-slate-800 text-xs">
+                        <!-- Correos cargados dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="flex justify-end pt-4 border-t border-slate-800 mt-4">
+                <button onclick="closeOutlookEmailsModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-lg">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE DETALLE DE PAYLOAD & TELEMETRÍA ANTIGRAVITY -->
+    <div id="payload-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="glass-panel w-full max-w-2xl p-6 rounded-2xl shadow-2xl border border-slate-700 relative">
+            <button onclick="closePayloadModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            <h3 class="text-lg font-bold text-white mb-2 flex items-center space-x-2">
+                <i data-lucide="activity" class="w-5 h-5 text-indigo-400"></i>
+                <span>Detalle de Payload / Resultado de Telemetría</span>
+            </h3>
+            <p class="text-xs text-slate-400 mb-4">Inspección del resultado de ejecución y parámetros calculados por Antigravity / Handlers.</p>
+
+            <pre class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs font-mono text-indigo-300 overflow-x-auto max-h-96" id="payload-modal-content">
+                <!-- JSON visualizado -->
+            </pre>
+
+            <div class="flex justify-end pt-4 border-t border-slate-800 mt-4">
+                <button onclick="closePayloadModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LÓGICA DE JAVASCRIPT DE LA SPA -->
+    <script>
+        // Inicializar Lucide Icons
+        lucide.createIcons();
+
+        let scriptChart = null;
+        let wzLoadedEmailsCache = [];
+
+        // Colapsar / Expandir Sidebar Lateral
+        function toggleSidebar() {
+            const sidebar = document.getElementById('main-sidebar');
+            const icon = document.getElementById('sidebar-toggle-icon');
+            sidebar.classList.toggle('sidebar-collapsed');
+            if (sidebar.classList.contains('sidebar-collapsed')) {
+                icon.setAttribute('data-lucide', 'panel-left-open');
+            } else {
+                icon.setAttribute('data-lucide', 'panel-left-close');
+            }
+            lucide.createIcons();
+        }
+
+        // Gestión de Pestañas (SPA)
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('text-indigo-400', 'bg-indigo-600/10', 'border-indigo-500/30');
+                btn.classList.add('text-slate-400');
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+            activeBtn.classList.remove('text-slate-400');
+            activeBtn.classList.add('text-indigo-400', 'bg-indigo-600/10', 'border', 'border-indigo-500/30');
+
+            if (tabId === 'dashboard') loadDashboardData();
+            if (tabId === 'wizard') wzInitWizard();
+            if (tabId === 'execution') loadExecutionLogs();
+            if (tabId === 'manage') loadManageMonitors();
+            if (tabId === 'logs') loadSystemLogs();
+            if (tabId === 'outlook') loadOutlookTree();
+            if (tabId === 'scripts') loadScriptsData();
+            if (tabId === 'audit') loadAuditLogs();
+        }
+
+        // Cargar Dashboard
+        async function loadDashboardData() {
+            try {
+                const res = await fetch('/api/dashboard/stats');
+                const data = await res.json();
+
+                document.getElementById('stat-total').innerText = data.total_processed;
+                document.getElementById('stat-success').innerText = data.total_success;
+                document.getElementById('stat-failed').innerText = data.total_failed;
+                document.getElementById('stat-alarms').innerText = data.active_alarms;
+
+                // Renderizar gráfico de scripts
+                const ctx = document.getElementById('chart-scripts').getContext('2d');
+                const labels = data.script_distribution.map(s => s.script_name);
+                const counts = data.script_distribution.map(s => s.count);
+
+                if (scriptChart) scriptChart.destroy();
+                scriptChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: counts,
+                            backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#3b82f6'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { labels: { color: '#94a3b8' } } }
+                    }
+                });
+
+                // Cargar Alarmas
+                const alarmsRes = await fetch('/api/dashboard/alarms');
+                const alarms = await alarmsRes.json();
+                const alarmList = document.getElementById('alarm-list');
+                alarmList.innerHTML = '';
+                document.getElementById('alarm-count-badge').innerText = `${alarms.filter(a => a.status === 'ACTIVE').length} Activas`;
+
+                alarms.forEach(alarm => {
+                    const badgeClass = alarm.severity === 'CRITICAL' ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+                    alarmList.innerHTML += `
+                        <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-xs">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-semibold px-2 py-0.5 rounded border ${badgeClass}">${alarm.severity} - ${alarm.alarm_type}</span>
+                                <span class="text-slate-500">${alarm.created_at}</span>
+                            </div>
+                            <p class="text-slate-300">${alarm.message}</p>
+                        </div>
+                    `;
+                });
+
+                // Cargar Estado de los Microservicios Entrelazados
+                await loadMicroservicesStatus();
+
+            } catch (err) {
+                console.error("Error cargando dashboard:", err);
+            }
+        }
+
+        // Cargar Telemetría de Microservicios Entrelazados
+        async function loadMicroservicesStatus() {
+            try {
+                const res = await fetch('/api/microservices/status');
+                const data = await res.json();
+                if (!data || !data.services) return;
+
+                const now = new Date();
+                document.getElementById('mesh-last-sync').innerText = `Sync: ${now.toLocaleTimeString()}`;
+
+                const sMapi = data.services.find(s => s.service_id === 'mapi_reader_daemon');
+                const sCore = data.services.find(s => s.service_id === 'core_execution_engine');
+                const sWeb = data.services.find(s => s.service_id === 'web_management_api');
+
+                // 1. Render MAPI
+                if (sMapi) {
+                    const badge = document.getElementById('badge-mapi');
+                    const text = document.getElementById('text-mapi');
+                    const time = document.getElementById('time-mapi');
+                    const details = document.getElementById('details-mapi');
+
+                    if (text) text.innerText = sMapi.status;
+                    if (time) time.innerText = sMapi.last_heartbeat || 'Activo';
+                    if (details) details.innerText = sMapi.details || 'Escuchando Outlook MAPI';
+                    
+                    const intervalEl = document.getElementById('interval-mapi');
+                    if (intervalEl && sMapi.metrics) {
+                        intervalEl.innerText = `Cada ${sMapi.metrics.interval_sec || 5} segundos`;
+                    }
+                    const foldersCountEl = document.getElementById('folders-count-mapi');
+                    if (foldersCountEl) {
+                        foldersCountEl.innerText = `${sMapi.monitored_folders_count || 0} activa(s)`;
+                    }
+
+                    if (badge) {
+                        const dotClass = sMapi.status === 'ONLINE' ? 'bg-emerald-400 animate-pulse' : (sMapi.status === 'OFFLINE' ? 'bg-rose-400' : 'bg-amber-400');
+                        const borderClass = sMapi.status === 'ONLINE' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : (sMapi.status === 'OFFLINE' ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30');
+                        badge.className = `flex items-center space-x-1.5 text-xs px-2.5 py-0.5 rounded-full border font-semibold ${borderClass}`;
+                        badge.innerHTML = `<span class="w-2 h-2 rounded-full ${dotClass}"></span><span id="text-mapi">${sMapi.status}</span>`;
+                    }
+                }
+
+                // 2. Render Core
+                if (sCore) {
+                    const badge = document.getElementById('badge-core');
+                    const text = document.getElementById('text-core');
+                    const time = document.getElementById('time-core');
+                    const rate = document.getElementById('success-rate-core');
+                    const details = document.getElementById('details-core');
+
+                    if (text) text.innerText = sCore.status;
+                    if (time) time.innerText = sCore.last_heartbeat || 'Activo';
+                    if (details) details.innerText = sCore.details || 'Motor de ejecución listo';
+                    if (rate && sCore.metrics) {
+                        rate.innerText = `${sCore.metrics.success_rate || 100}%`;
+                    }
+
+                    if (badge) {
+                        const dotClass = sCore.status === 'ONLINE' ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400';
+                        const borderClass = sCore.status === 'ONLINE' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+                        badge.className = `flex items-center space-x-1.5 text-xs px-2.5 py-0.5 rounded-full border font-semibold ${borderClass}`;
+                        badge.innerHTML = `<span class="w-2 h-2 rounded-full ${dotClass}"></span><span id="text-core">${sCore.status}</span>`;
+                    }
+                }
+
+                // 3. Render Web
+                if (sWeb) {
+                    const badge = document.getElementById('badge-web');
+                    const text = document.getElementById('text-web');
+                    const time = document.getElementById('time-web');
+                    const details = document.getElementById('details-web');
+
+                    if (text) text.innerText = sWeb.status;
+                    if (time) time.innerText = sWeb.last_heartbeat || 'Activo';
+                    if (details) details.innerText = sWeb.details || 'Escuchando en 0.0.0.0:5000';
+
+                    if (badge) {
+                        const dotClass = sWeb.status === 'ONLINE' ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400';
+                        const borderClass = sWeb.status === 'ONLINE' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+                        badge.className = `flex items-center space-x-1.5 text-xs px-2.5 py-0.5 rounded-full border font-semibold ${borderClass}`;
+                        badge.innerHTML = `<span class="w-2 h-2 rounded-full ${dotClass}"></span><span id="text-web">${sWeb.status}</span>`;
+                    }
+                }
+
+                lucide.createIcons();
+            } catch (err) {
+                console.error("Error cargando estado de microservicios:", err);
+            }
+        }
+
+        // LÓGICA DEL CREADOR DE MONITOREO (WIZARD 3 PASOS)
+        let wzTreeCache = [];
+
+        async function wzInitWizard() {
+            await wzLoadAccounts();
+        }
+
+        async function wzLoadAccounts() {
+            try {
+                const res = await fetch('/api/outlook/accounts');
+                const accounts = await res.json();
+                const accSelect = document.getElementById('wz-account-select');
+                accSelect.innerHTML = '';
+                
+                if (accounts && accounts.length > 0) {
+                    accounts.forEach(acc => {
+                        accSelect.innerHTML += `<option value="${acc}">${acc}</option>`;
+                    });
+                } else {
+                    accSelect.innerHTML = '<option value="marco.vizcaino@sonda.com">marco.vizcaino@sonda.com</option>';
+                }
+
+                wzOnAccountChanged();
+            } catch (err) {
+                console.error("Error cargando cuentas Outlook MAPI:", err);
+            }
+        }
+
+        async function wzOnAccountChanged() {
+            const selectedAcc = document.getElementById('wz-account-select').value;
+            const folderSelect = document.getElementById('wz-folder-select');
+            const emailSelect = document.getElementById('wz-email-select');
+            folderSelect.innerHTML = '<option value="">Cargando subcarpetas de Bandeja de entrada...</option>';
+            if (emailSelect) {
+                emailSelect.innerHTML = '<option value="">-- Clic en \'Analizar Carpeta\' para inspeccionar --</option>';
+            }
+            wzClearPreview();
+            
+            try {
+                // Consulta EXCLUSIVA de subcarpetas dentro de 'Bandeja de entrada'
+                const res = await fetch(`/api/outlook/inbox_subfolders?account=${encodeURIComponent(selectedAcc)}`);
+                wzTreeCache = await res.json();
+                folderSelect.innerHTML = '';
+
+                if (!wzTreeCache || wzTreeCache.length === 0) {
+                    folderSelect.innerHTML = `<option value="${selectedAcc}/Bandeja de entrada">Bandeja de entrada (0 msgs)</option>`;
+                } else {
+                    wzTreeCache.forEach(item => {
+                        const displayPath = item.folder_path.replace(selectedAcc + '/', '');
+                        folderSelect.innerHTML += `<option value="${item.folder_path}">${item.folder_name} — [${displayPath}] (${item.count} msgs)</option>`;
+                    });
+                }
+                // NO auto-cargar todos los correos inmediatamente para evitar bloqueos por volumen MAPI.
+                // Los correos se inspeccionan a demanda al dar clic en 'Analizar Carpeta'.
+            } catch (err) {
+                console.error("Error cargando subcarpetas:", err);
+                folderSelect.innerHTML = '<option value="">Error cargando subcarpetas</option>';
+            }
+        }
+
+        function wzPopulateFoldersForAccount() {
+            wzOnAccountChanged();
+        }
+
+        function wzOnSearchFilter() {
+            const query = document.getElementById('wz-search-input').value.toLowerCase();
+            const folderSelect = document.getElementById('wz-folder-select');
+            const emailSelect = document.getElementById('wz-email-select');
+
+            // 1. Filtrar carpetas
+            if (wzTreeCache && wzTreeCache.length > 0) {
+                folderSelect.innerHTML = '';
+                const matching = wzTreeCache.filter(item => {
+                    return item.folder_name.toLowerCase().includes(query) || item.folder_path.toLowerCase().includes(query);
+                });
+                matching.forEach(item => {
+                    folderSelect.innerHTML += `<option value="${item.folder_path}">${item.folder_name} (${item.count} msgs)</option>`;
+                });
+            }
+
+            // 2. Filtrar correos cargados
+            if (wzLoadedEmailsCache && wzLoadedEmailsCache.length > 0) {
+                emailSelect.innerHTML = '';
+                wzLoadedEmailsCache.forEach((e, idx) => {
+                    const fullTxt = `${e.subject} ${e.sender} ${e.body} ${(e.attachment_names || []).join(' ')}`.toLowerCase();
+                    if (fullTxt.includes(query)) {
+                        const attBadge = e.has_attachments ? ' [Adjuntos: ' + e.attachment_names.length + ']' : '';
+                        emailSelect.innerHTML += `<option value="${idx}">[${e.received_at || 'MAPI'}] ${e.subject} - De: ${e.sender}${attBadge}</option>`;
+                    }
+                });
+                wzOnEmailSelected();
+            }
+        }
+
+        function wzGetSelectedFolderPath() {
+            return document.getElementById('wz-folder-select').value;
+        }
+
+        function wzOnFolderChanged() {
+            const emailSelect = document.getElementById('wz-email-select');
+            if (emailSelect) {
+                emailSelect.innerHTML = '<option value="">-- Clic en \'Analizar Carpeta\' para inspeccionar --</option>';
+            }
+            wzClearPreview();
+        }
+
+        async function wzAnalyzeFolderNow() {
+            const folderPath = wzGetSelectedFolderPath();
+            if (!folderPath) {
+                alert("Por favor selecciona una subcarpeta de la Bandeja de entrada primero.");
+                return;
+            }
+
+            const targetSub = document.getElementById('wz-target-subfolder')?.value || 'analizados';
+            const btn = event?.currentTarget;
+            let originalText = "";
+            if (btn) {
+                originalText = btn.innerHTML;
+                btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i><span>Analizando...</span>`;
+                btn.disabled = true;
+            }
+
+            try {
+                const res = await fetch('/api/outlook/analyze_folder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        folder: folderPath,
+                        target_subfolder: targetSub
+                    })
+                });
+                const result = await res.json();
+                
+                if (result.success) {
+                    alert(`¡Análisis Exitoso y Traslado a Subcarpeta!\n\n` +
+                          `• Correos Analizados: ${result.analyzed_count}\n` +
+                          `• Correos Movidos a '${targetSub}': ${result.moved_count}\n` +
+                          `• Carpeta Origen: ${folderPath}\n` +
+                          `• Identificador BDD: [UnixTime + Asunto] registrado\n\n` +
+                          `${result.message || ''}`);
+                    await wzFetchEmailsForFolder();
+                } else {
+                    alert(`Error en el análisis: ${result.error || 'No se pudo completar el análisis.'}`);
+                }
+            } catch (err) {
+                alert(`Error durante el análisis y movimiento de correos: ${err}`);
+            } finally {
+                if (btn) {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    lucide.createIcons();
+                }
+            }
+        }
+
+        async function wzFetchEmailsForFolder() {
+            const folderPath = wzGetSelectedFolderPath();
+            const selectEl = document.getElementById('wz-email-select');
+            if (!selectEl) return;
+            selectEl.innerHTML = '<option value="">Cargando correos MAPI...</option>';
+
+            try {
+                const res = await fetch(`/api/outlook/emails?folder=${encodeURIComponent(folderPath)}`);
+                wzLoadedEmailsCache = await res.json();
+                selectEl.innerHTML = '';
+
+                if (!wzLoadedEmailsCache || wzLoadedEmailsCache.length === 0) {
+                    selectEl.innerHTML = '<option value="">Sin correos en esta carpeta</option>';
+                    wzClearPreview();
+                } else {
+                    wzLoadedEmailsCache.forEach((e, idx) => {
+                        const attBadge = e.has_attachments ? ` [📎 ${e.attachment_names ? e.attachment_names.length : 1}]` : '';
+                        selectEl.innerHTML += `<option value="${idx}">[${e.received_at || 'MAPI'}] ${e.subject} - De: ${e.sender}${attBadge}</option>`;
+                    });
+                    wzOnEmailSelected();
+                }
+            } catch (err) {
+                selectEl.innerHTML = '<option value="">Error cargando correos</option>';
+            }
+        }
+
+        function wzOnEmailSelected() {
+            const idx = document.getElementById('wz-email-select').value;
+            if (idx === "" || !wzLoadedEmailsCache[idx]) {
+                wzClearPreview();
+                return;
+            }
+            const e = wzLoadedEmailsCache[idx];
+            document.getElementById('wz-preview-subject').innerText = e.subject;
+            document.getElementById('wz-preview-sender').innerText = `Remitente: ${e.sender}`;
+            document.getElementById('wz-preview-body').innerText = e.body || "Sin cuerpo de texto.";
+
+            // Mostrar metadata de adjuntos y UnixTime
+            const attContainer = document.getElementById('wz-preview-attachments');
+            if (attContainer) {
+                if (e.has_attachments && e.attachment_names && e.attachment_names.length > 0) {
+                    attContainer.innerHTML = `<span class="text-amber-300 font-bold">📎 Adjuntos (${e.attachment_names.length}):</span> ` +
+                        e.attachment_names.map(a => `<span class="bg-slate-800 px-1.5 py-0.5 rounded text-[10px] text-slate-300 mr-1 font-mono">${a}</span>`).join('');
+                    attContainer.classList.remove('hidden');
+                } else {
+                    attContainer.innerHTML = '<span class="text-slate-500">Sin archivos adjuntos</span>';
+                    attContainer.classList.add('hidden');
+                }
+            }
+
+            const unixtimeEl = document.getElementById('wz-preview-unixtime');
+            if (unixtimeEl) {
+                const uVal = e.unixtime || Date.now() / 1000 | 0;
+                unixtimeEl.innerText = `UnixTime ID: ${uVal}`;
+            }
+
+            if (!document.getElementById('wz-rule-name').value) {
+                document.getElementById('wz-rule-name').value = `Monitoreo: ${e.subject.substring(0, 30)}`;
+            }
+        }
+
+        function wzClearPreview() {
+            document.getElementById('wz-preview-subject').innerText = "Ningún correo seleccionado";
+            document.getElementById('wz-preview-sender').innerText = "Remitente: N/A";
+            document.getElementById('wz-preview-body').innerText = "Selecciona un correo de la lista desplegable.";
+            const attContainer = document.getElementById('wz-preview-attachments');
+            if (attContainer) attContainer.classList.add('hidden');
+        }
+
+        function wzSelectTemplate(handlerCode, templateName, subjectRegex, templateType) {
+            document.getElementById('wz-handler-code').value = handlerCode;
+            document.getElementById('wz-subject-pattern').value = subjectRegex;
+            
+            let rulesJson = "{}";
+            if (templateType === 'hetrix') rulesJson = '{"url_servicio": "https?://\\\\S+", "estado": "(DOWN|UP)"}';
+            else if (templateType === 'totem') rulesJson = '{"totem_id": "TOTEM-\\\\d+", "ip": "\\\\d+\\\\.\\\\d+\\\\.\\\\d+\\\\.\\\\d+"}';
+            else if (templateType === 'antigravity') rulesJson = '{"temp_c": "TEMP[:=]\\\\s*([\\\\d.]+)", "jitter_ms": "JITTER[:=]\\\\s*([\\\\d.]+)"}';
+            else if (templateType === 'networker') rulesJson = '{"status": "(SUCCESS|FAILED)", "client": "\\\\w+"}';
+
+            document.getElementById('wz-extraction-rules').value = rulesJson;
+            alert(`Plantilla "${templateName}" seleccionada. Se cargaron las reglas por defecto.`);
+        }
+
+        function wzToggleForwardingOptions() {
+            const enabled = document.getElementById('wz-forward-enabled').checked;
+            const container = document.getElementById('wz-forward-options');
+            if (enabled) {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        function wzToggleAttachmentOptions() {
+            const enabled = document.getElementById('wz-attachment-enabled').checked;
+            const container = document.getElementById('wz-attachment-options');
+            if (enabled) {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        function wzOnAlarmActionChanged() {
+            const val = document.getElementById('wz-alarm-action').value;
+            const n8nBlock = document.getElementById('wz-block-n8n');
+            const zabbixBlock = document.getElementById('wz-block-zabbix');
+            const webhookBlock = document.getElementById('wz-block-webhook');
+
+            if (n8nBlock) n8nBlock.classList.toggle('hidden', val !== 'N8N_WEBHOOK');
+            if (zabbixBlock) zabbixBlock.classList.toggle('hidden', val !== 'ZABBIX_ALARM');
+            if (webhookBlock) webhookBlock.classList.toggle('hidden', val !== 'EXTERNAL_WEBHOOK');
+        }
+
+        async function wzSaveMonitoringRule(e) {
+            e.preventDefault();
+            const targetFolder = wzGetSelectedFolderPath();
+            const payload = {
+                script_name: document.getElementById('wz-rule-name').value,
+                description: `Regla creada mediante Creador de Monitoreo para subcarpeta ${targetFolder}`,
+                target_client: 'GPF',
+                rule_type: document.getElementById('wz-alarm-action').value === 'N8N_WEBHOOK' ? 'AI_N8N' : 'DETERMINISTIC',
+                subject_pattern: document.getElementById('wz-subject-pattern').value,
+                body_extraction_rules: document.getElementById('wz-extraction-rules').value,
+                script_code: document.getElementById('wz-handler-code').value,
+                n8n_webhook_url: document.getElementById('wz-n8n-url').value,
+                external_webhook_url: document.getElementById('wz-external-url')?.value || '',
+                alarm_action: document.getElementById('wz-alarm-action').value,
+                post_processing_action: document.getElementById('wz-move-enabled').checked ? document.getElementById('wz-post-action').value : 'KEEP_ORIGINAL',
+                target_subfolder_name: document.getElementById('wz-target-subfolder').value || 'analizados',
+                forward_enabled: document.getElementById('wz-forward-enabled').checked,
+                forward_email_target: document.getElementById('wz-forward-email-target').value,
+                forward_timing: document.getElementById('wz-forward-timing').value,
+                attachment_filter_enabled: document.getElementById('wz-attachment-enabled')?.checked || false,
+                attachment_pattern: document.getElementById('wz-attachment-pattern')?.value || '',
+                target_folder_path: targetFolder,
+                step1_enabled: true,
+                step2_forward_enabled: document.getElementById('wz-forward-enabled').checked,
+                step2_analysis_enabled: true,
+                step3_enabled: document.getElementById('wz-step3-enabled') ? document.getElementById('wz-step3-enabled').checked : true,
+                step4_enabled: document.getElementById('wz-step4-enabled') ? document.getElementById('wz-step4-enabled').checked : true
+            };
+
+            await fetch('/api/scripts/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            alert(`¡Proyecto de Monitoreo "${payload.script_name}" guardado y activado exitosamente!\n\n` +
+                  `• Origen: ${targetFolder}\n` +
+                  `• Acción Paso 2: Reenvío (${payload.forward_enabled ? payload.forward_email_target : 'Inactivo'}) & Búsqueda Título/Body\n` +
+                  `• Alerta Paso 3: ${payload.alarm_action}\n` +
+                  `• Destino Paso 4: Subcarpeta '${payload.target_subfolder_name}'\n` +
+                  `• Persistencia Paso 5: Clave Única [UnixTime + Asunto]`);
+            switchTab('execution');
+        }
+
+        // Cargar Arbol y Estado de Outlook
+        async function loadOutlookTree() {
+            const tbody = document.getElementById('folder-tree-body');
+            tbody.innerHTML = '<tr><td colspan="6" class="py-6 text-center text-slate-400">Sincronizando carpetas y verificando conexión MAPI Outlook...</td></tr>';
+
+            // 1. Verificar estado de conexión MAPI
+            try {
+                const statusRes = await fetch('/api/outlook/status');
+                const statusData = await statusRes.json();
+                const statusBadge = document.getElementById('outlook-status-badge');
+                if (statusBadge) {
+                    if (statusData.connected) {
+                        statusBadge.className = "px-3 py-1.5 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center space-x-1.5";
+                        statusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span>Conexión MAPI Real: ACTIVA (${statusData.status})</span>`;
+                    } else {
+                        statusBadge.className = "px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold flex items-center space-x-1.5";
+                        statusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400"></span><span>Conexión MAPI: FALLBACK / SIMULADOR (${statusData.status})</span>`;
+                    }
+                }
+            } catch (err) {
+                console.error("Error verificando estado Outlook:", err);
+            }
+
+            // 2. Cargar lista de carpetas
+            try {
+                const res = await fetch('/api/outlook/tree');
+                const folders = await res.json();
+                tbody.innerHTML = '';
+
+                document.getElementById('outlook-monitored-count').innerText = `${folders.length} Subcarpetas Activas`;
+
+                if (!folders || folders.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="py-6 text-center text-slate-500">No se encontraron carpetas registradas.</td></tr>';
+                    return;
+                }
+
+                folders.forEach(f => {
+                    const countVal = f.count !== undefined ? f.count : 30;
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-900/50 transition-colors">
+                            <td class="py-3 px-4 font-mono text-indigo-300 flex items-center space-x-2">
+                                <i data-lucide="folder" class="w-4 h-4 text-indigo-400"></i>
+                                <span class="font-medium text-white">${f.folder_path}</span>
+                            </td>
+                            <td class="py-3 px-4 font-mono text-xs text-slate-300">
+                                <span class="px-2 py-0.5 rounded bg-slate-800 text-indigo-300 font-bold">${countVal} msgs</span>
+                            </td>
+                            <td class="py-3 px-4">
+                                <span class="px-2 py-0.5 rounded text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">ESCUCHANDO MAPI</span>
+                            </td>
+                            <td class="py-3 px-4 font-semibold text-slate-200">${f.script_name || 'Mapeador por Defecto'}</td>
+                            <td class="py-3 px-4">
+                                <span class="px-2 py-0.5 rounded text-xs font-semibold ${f.use_ai ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'}">
+                                    ${f.use_ai ? 'GEMINI / N8N IA' : 'PIPELINE NATIVO'}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4 text-right flex justify-end space-x-2">
+                                <button onclick="openFolderEmailsModal('${f.folder_path}')" class="px-3 py-1 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/30 rounded-lg text-xs font-semibold transition-all flex items-center space-x-1">
+                                    <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                                    <span>Ver Correos</span>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="6" class="py-6 text-center text-rose-400">Error conectando con el servidor para cargar las carpetas de Outlook.</td></tr>';
+            }
+            lucide.createIcons();
+        }
+
+        // Cargar Scripts Activos y Legacy
+        async function loadScriptsData() {
+            const res = await fetch('/api/scripts');
+            const scripts = await res.json();
+            const grid = document.getElementById('scripts-grid');
+            grid.innerHTML = '';
+
+            scripts.forEach(s => {
+                grid.innerHTML += `
+                    <div class="glass-panel p-5 rounded-2xl border border-slate-800 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-bold text-white text-base">${s.script_name}</h4>
+                                <span class="px-2 py-0.5 rounded text-xs font-semibold ${s.is_ai_enabled ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'}">
+                                    ${s.rule_type}
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-400 mb-3">${s.description || 'Sin descripción'}</p>
+                            <div class="text-xs space-y-1 font-mono text-slate-300">
+                                <div><span class="text-slate-500">Cliente:</span> ${s.target_client}</div>
+                                <div><span class="text-slate-500">Regex Subject:</span> ${s.subject_pattern}</div>
+                                <div><span class="text-slate-500">Acción:</span> <span class="text-amber-300 font-bold">${s.alarm_action || 'LOG_ONLY'}</span></div>
+                            </div>
+                        </div>
+                        <div class="flex justify-end space-x-2 mt-4 pt-3 border-t border-slate-800/80">
+                            <button onclick="deleteScript(${s.id})" class="px-3 py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg text-xs">Eliminar</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            loadLegacyScripts();
+        }
+
+        async function loadLegacyScripts() {
+            try {
+                loadMacroPipeline();
+
+                const res = await fetch('/api/legacy_scripts');
+                const legacyFiles = await res.json();
+                const container = document.getElementById('legacy-files-list');
+                container.innerHTML = '';
+
+                legacyFiles.forEach(file => {
+                    container.innerHTML += `
+                        <button onclick="viewLegacyScriptCode('${file.filename}', ${file.size_kb})" class="w-full text-left p-2.5 rounded-xl bg-slate-900/80 hover:bg-indigo-600/20 border border-slate-800 hover:border-indigo-500/50 transition-all flex justify-between items-center group">
+                            <span class="text-xs font-mono font-medium text-slate-300 group-hover:text-indigo-300 flex items-center space-x-2">
+                                <i data-lucide="file-text" class="w-3.5 h-3.5 text-indigo-400"></i>
+                                <span>${file.filename}</span>
+                            </span>
+                            <span class="text-[10px] text-slate-500 font-mono">${file.size_kb} KB</span>
+                        </button>
+                    `;
+                });
+                lucide.createIcons();
+            } catch (err) {
+                console.error("Error cargando scripts legacy:", err);
+            }
+        }
+
+        async function loadMacroPipeline() {
+            try {
+                const res = await fetch('/api/macro_process/analysis');
+                const data = await res.json();
+                const container = document.getElementById('macro-pipeline-cards');
+                container.innerHTML = '';
+
+                data.unified_pipeline.forEach(phase => {
+                    container.innerHTML += `
+                        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex flex-col justify-between">
+                            <div>
+                                <span class="text-[10px] font-bold text-indigo-400 font-mono uppercase">${phase.phase_id}</span>
+                                <h5 class="text-xs font-bold text-white mt-0.5">${phase.name}</h5>
+                                <p class="text-[11px] text-slate-400 mt-1 leading-tight">${phase.description}</p>
+                            </div>
+                            <div class="mt-2 pt-2 border-t border-slate-900 flex flex-wrap gap-1">
+                                ${phase.components.map(c => `<span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">${c}</span>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (err) {
+                console.error("Error cargando Macro-Proceso:", err);
+            }
+        }
+
+        async function viewLegacyScriptCode(filename, sizeKb) {
+            document.getElementById('legacy-viewer-title').innerText = filename;
+            document.getElementById('legacy-viewer-size').innerText = `${sizeKb} KB`;
+            document.getElementById('legacy-code-content').innerText = "Cargando código fuente original...";
+
+            try {
+                const res = await fetch(`/api/legacy_scripts/${filename}`);
+                const data = await res.json();
+                document.getElementById('legacy-code-content').innerText = data.code || "# Sin contenido";
+
+                const stepsContainer = document.getElementById('script-analysis-steps');
+                stepsContainer.innerHTML = '';
+                if (data.analysis && data.analysis.steps) {
+                    data.analysis.steps.forEach(st => {
+                        stepsContainer.innerHTML += `
+                            <div class="p-2 rounded-lg bg-slate-900 border border-slate-800">
+                                <div class="font-bold text-indigo-300">Paso ${st.step}: ${st.title}</div>
+                                <div class="text-[11px] text-slate-400">${st.desc}</div>
+                            </div>
+                        `;
+                    });
+                }
+            } catch (err) {
+                document.getElementById('legacy-code-content').innerText = "# Error leyendo el código fuente del script.";
+            }
+        }
+
+        async function deleteScript(id) {
+            if (confirm("¿Deseas eliminar esta regla de monitoreo?")) {
+                await fetch(`/api/scripts/delete/${id}`, { method: 'DELETE' });
+                loadScriptsData();
+            }
+        }
+
+        // Modal de Visualización de Correos por Carpeta
+        async function openFolderEmailsModal(folderPath) {
+            document.getElementById('modal-folder-title').innerText = `Correos en la Carpeta: ${folderPath}`;
+            const modal = document.getElementById('outlook-emails-modal');
+            const tbody = document.getElementById('modal-emails-body');
+            tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-slate-400">Cargando correos MAPI de Outlook...</td></tr>';
+            modal.classList.remove('hidden');
+
+            try {
+                const res = await fetch(`/api/outlook/emails?folder=${encodeURIComponent(folderPath)}`);
+                const emails = await res.json();
+                tbody.innerHTML = '';
+
+                if (!emails || emails.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-slate-500">No se encontraron correos en esta carpeta.</td></tr>';
+                } else {
+                    emails.forEach(e => {
+                        tbody.innerHTML += `
+                            <tr class="hover:bg-slate-900/60 border-b border-slate-800/60">
+                                <td class="py-2.5 px-3 text-slate-400 font-mono">${e.received_at || 'N/A'}</td>
+                                <td class="py-2.5 px-3 font-semibold text-slate-300">${e.sender}</td>
+                                <td class="py-2.5 px-3 text-white font-medium">${e.subject}</td>
+                                <td class="py-2.5 px-3">
+                                    <span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">${e.status || 'CAPTURADO'}</span>
+                                </td>
+                                <td class="py-2.5 px-3 text-right">
+                                    <button onclick='showPayloadModal(${JSON.stringify(e.extracted_params || e.body)})' class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-indigo-300 rounded font-mono text-[11px]">Ver Detalle</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-rose-400">Error recuperando correos de Outlook.</td></tr>';
+            }
+            lucide.createIcons();
+        }
+
+        function closeOutlookEmailsModal() {
+            document.getElementById('outlook-emails-modal').classList.add('hidden');
+        }
+
+        function showPayloadModal(content) {
+            let formattedStr = "";
+            try {
+                if (typeof content === 'string') {
+                    try { formattedStr = JSON.stringify(JSON.parse(content), null, 2); }
+                    catch(e) { formattedStr = content; }
+                } else {
+                    formattedStr = JSON.stringify(content, null, 2);
+                }
+            } catch(err) {
+                formattedStr = String(content);
+            }
+            document.getElementById('payload-modal-content').innerText = formattedStr;
+            document.getElementById('payload-modal').classList.remove('hidden');
+        }
+
+        function closePayloadModal() {
+            document.getElementById('payload-modal').classList.add('hidden');
+        }
+
+        // Cargar Auditoría
+        async function loadAuditLogs() {
+            const res = await fetch('/api/audit/logs');
+            const logs = await res.json();
+            const tbody = document.getElementById('audit-logs-body');
+            tbody.innerHTML = '';
+
+            logs.forEach(l => {
+                let badgeColor = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+                if (l.execution_status === 'FAILED') badgeColor = 'bg-rose-500/20 text-rose-300 border-rose-500/30';
+                if (l.execution_status === 'WARNING') badgeColor = 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+
+                const payloadData = l.extracted_params || l.ai_payload_response || l.error_details || '{}';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-900/40 border-b border-slate-800/80">
+                        <td class="py-3 px-4 text-xs text-slate-400">${l.received_at}</td>
+                        <td class="py-3 px-4 text-xs font-mono text-slate-300">${l.email_sender}</td>
+                        <td class="py-3 px-4 text-xs font-medium text-white">${l.email_subject}</td>
+                        <td class="py-3 px-4 text-xs font-semibold text-indigo-300">${l.script_name}</td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-0.5 rounded text-xs border font-semibold ${badgeColor}">${l.execution_status}</span>
+                        </td>
+                        <td class="py-3 px-4 text-xs text-slate-400">${l.execution_time_ms ? l.execution_time_ms.toFixed(1) + ' ms' : 'N/A'}</td>
+                        <td class="py-3 px-4 text-right">
+                            <button onclick='showPayloadModal(${JSON.stringify(payloadData)})' class="text-xs px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 rounded-lg transition-all">Ver Payload</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function simulateTestEmail() {
+            await fetch('/api/scripts/simulate_test', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    subject: 'Hetrix Alert: Service DOWN https://hetrix.com/s/test',
+                    sender: 'alerts@hetrix.com',
+                    body: 'Dispositivo TOTEM-99 en IP 10.0.0.1 fuera de línea'
+                })
+            });
+            setTimeout(loadAuditLogs, 1000);
+        }
+
+        async function simulateAntigravityEmail() {
+            await fetch('/api/scripts/simulate_test', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    subject: 'Antigravity Telemetry Report: Sensor Node Alpha',
+                    sender: 'sensor.physics@antigravity.sonda.com',
+                    body: 'REPORTE TELEMETRIA: TEMP: 89.2, JITTER: 155.4, ENERGY: 21.8, PRESSURE: 1.08',
+                    folder: 'Bandeja de entrada/ANTIGRAVITY_TELEMETRY'
+                })
+            });
+            setTimeout(loadAuditLogs, 1000);
+        }
+
+        // Cargar Execution Logs para la pestaña Execution Script
+        async function loadExecutionLogs() {
+            const tbody = document.getElementById('execution-logs-body');
+            tbody.innerHTML = '<tr><td colspan="7" class="py-6 text-center text-slate-400">Cargando registro de ejecuciones en tiempo real...</td></tr>';
+            try {
+                const res = await fetch('/api/audit/logs');
+                const logs = await res.json();
+                tbody.innerHTML = '';
+
+                if (!logs || logs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="py-6 text-center text-slate-500">No se han registrado ejecuciones de monitoreos aún.</td></tr>';
+                    return;
+                }
+
+                logs.forEach(l => {
+                    let badgeColor = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+                    if (l.execution_status === 'FAILED') badgeColor = 'bg-rose-500/20 text-rose-300 border-rose-500/30';
+                    if (l.execution_status === 'WARNING') badgeColor = 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+
+                    const payloadData = l.extracted_params || l.ai_payload_response || l.error_details || '{}';
+                    const uniqueKeyText = l.unique_key || (l.email_unixtime ? `${l.email_unixtime}_${(l.email_subject||'').substring(0,15)}` : 'N/A');
+
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-900/50 transition-colors border-b border-slate-800/80">
+                            <td class="py-3 px-4 text-xs font-mono text-slate-400">${l.received_at}</td>
+                            <td class="py-3 px-4 text-[11px] font-mono text-amber-300">
+                                <span class="bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded">${uniqueKeyText}</span>
+                            </td>
+                            <td class="py-3 px-4 font-bold text-indigo-300 text-xs">
+                                <div>${l.script_name}</div>
+                                <div class="text-[10px] text-slate-500 font-mono">ID: #${l.script_id || 'N/A'}</div>
+                            </td>
+                            <td class="py-3 px-4 text-xs text-slate-300">
+                                <div>${l.email_sender}</div>
+                                <div class="text-[10px] text-indigo-400 font-mono">${l.folder_path}</div>
+                            </td>
+                            <td class="py-3 px-4 text-xs font-medium text-white max-w-xs truncate" title="${l.email_subject}">${l.email_subject}</td>
+                            <td class="py-3 px-4">
+                                <span class="px-2 py-0.5 rounded text-[11px] border font-bold ${badgeColor}">${l.execution_status}</span>
+                            </td>
+                            <td class="py-3 px-4 text-right">
+                                <button onclick='showPayloadModal(${JSON.stringify(payloadData)})' class="text-xs px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-indigo-300 border border-slate-700 rounded-lg">Ver Log / Salida</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-6 text-center text-rose-400">Error cargando ejecuciones: ${err}</td></tr>`;
+            }
+        }
+
+        // Cargar y Administrar Monitoreos Creados (Manage Monitoreo)
+        async function loadManageMonitors() {
+            const grid = document.getElementById('manage-monitors-grid');
+            grid.innerHTML = '<div class="col-span-2 py-6 text-center text-slate-400">Cargando proyectos de monitoreo creados...</div>';
+            try {
+                const res = await fetch('/api/scripts');
+                const scripts = await res.json();
+                grid.innerHTML = '';
+
+                if (!scripts || scripts.length === 0) {
+                    grid.innerHTML = '<div class="col-span-2 py-6 text-center text-slate-500">No hay proyectos de monitoreo registrados.</div>';
+                    return;
+                }
+
+                scripts.forEach(s => {
+                    const fwdText = s.forward_enabled 
+                        ? `<span class="text-emerald-400 font-semibold">ACTIVO (${s.forward_email_target || 'N/A'} - ${s.forward_timing})</span>`
+                        : `<span class="text-slate-500">Inactivo</span>`;
+
+                    grid.innerHTML += `
+                        <div class="glass-panel p-5 rounded-2xl border border-slate-800 hover:border-indigo-500/50 transition-all space-y-3">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="text-base font-bold text-white">${s.script_name}</h3>
+                                    <p class="text-xs text-slate-400 mt-0.5">${s.description || 'Sin descripción'}</p>
+                                </div>
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${s.rule_type === 'AI_N8N' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30'}">
+                                    ${s.rule_type}
+                                </span>
+                            </div>
+
+                            <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs space-y-1.5 font-mono">
+                                <div><b class="text-indigo-400">Patrón Título:</b> <span class="text-slate-200">${s.subject_pattern || '.*'}</span></div>
+                                <div class="flex items-center space-x-1.5 text-[10px] pt-1 flex-wrap gap-y-1">
+                                    <span class="px-1.5 py-0.5 rounded ${s.step1_enabled !== 0 ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-slate-800 text-slate-500'}">Paso 1: MAPI ON</span>
+                                    <span class="px-1.5 py-0.5 rounded ${s.forward_enabled ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' : 'bg-slate-800 text-slate-500'}">Paso 2: Reenvío ${s.forward_enabled ? 'ON' : 'OFF'}</span>
+                                    <span class="px-1.5 py-0.5 rounded ${s.attachment_filter_enabled ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-slate-800 text-slate-500'}">Adjuntos ${s.attachment_filter_enabled ? 'ON' : 'OFF'}</span>
+                                    <span class="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">Paso 3: Alerta (${s.alarm_action || 'LOG_ONLY'})</span>
+                                    <span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Paso 4: '${s.target_subfolder_name || 'analizados'}'</span>
+                                    <span class="px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30">Paso 5: Idempotente</span>
+                                </div>
+                                <div><b class="text-indigo-400">Carpeta Origen:</b> <span class="text-slate-200">${s.target_folder_path || 'Bandeja de entrada'}</span></div>
+                                <div><b class="text-indigo-400">Reenvío Outlook:</b> ${fwdText}</div>
+                                <div><b class="text-indigo-400">Destino Alerta:</b> <span class="text-slate-300">${s.alarm_action || 'LOG_ONLY'}</span></div>
+                            </div>
+
+                            <div class="flex justify-between items-center pt-2">
+                                <span class="text-[11px] text-slate-500">Creado: ${s.created_at || 'Reciente'}</span>
+                                <div class="flex space-x-2">
+                                    <button onclick="editMonitorRule(${s.id})" class="px-3 py-1.5 bg-indigo-600/30 hover:bg-indigo-600/60 text-indigo-200 border border-indigo-500/40 text-xs font-semibold rounded-lg flex items-center space-x-1">
+                                        <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                                        <span>Editar</span>
+                                    </button>
+                                    <button onclick="deleteMonitorRule(${s.id}, '${s.script_name}')" class="px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 border border-rose-500/30 text-xs font-semibold rounded-lg flex items-center space-x-1">
+                                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                        <span>Eliminar</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                lucide.createIcons();
+            } catch (err) {
+                grid.innerHTML = `<div class="col-span-2 py-6 text-center text-rose-400">Error cargando proyectos: ${err}</div>`;
+            }
+        }
+
+        async function deleteMonitorRule(scriptId, name) {
+            if (!confirm(`¿Estás seguro de que deseas eliminar el proyecto de monitoreo "${name}"?`)) return;
+            try {
+                let res = await fetch(`/api/scripts/delete/${scriptId}`, { method: 'DELETE' });
+                if (!res.ok) {
+                    res = await fetch(`/api/scripts/delete/${scriptId}`, { method: 'POST' });
+                }
+                const data = await res.json();
+                if (data.success) {
+                    alert(`Proyecto "${name}" eliminado correctamente.`);
+                    loadManageMonitors();
+                } else {
+                    alert(`No se pudo eliminar el proyecto: ${data.error || data.message || 'Error desconocido'}`);
+                }
+            } catch (err) {
+                alert(`Error de red al eliminar el proyecto: ${err}`);
+            }
+        }
+
+        async function editMonitorRule(scriptId) {
+            const res = await fetch('/api/scripts');
+            const scripts = await res.json();
+            const s = scripts.find(x => x.id === scriptId);
+            if (!s) return;
+
+            switchTab('wizard');
+            document.getElementById('wz-rule-name').value = s.script_name;
+            document.getElementById('wz-subject-pattern').value = s.subject_pattern || '.*';
+            document.getElementById('wz-post-action').value = s.post_processing_action || 'MOVE_ANALIZADO';
+            document.getElementById('wz-alarm-action').value = s.alarm_action || 'LOG_ONLY';
+            document.getElementById('wz-n8n-url').value = s.n8n_webhook_url || '';
+            document.getElementById('wz-extraction-rules').value = s.body_extraction_rules || '{}';
+            
+            document.getElementById('wz-step1-enabled').checked = s.step1_enabled !== 0;
+            document.getElementById('wz-step3-enabled').checked = s.step3_enabled !== 0;
+            document.getElementById('wz-step4-enabled').checked = s.step4_enabled !== 0;
+
+            if (s.forward_enabled) {
+                document.getElementById('wz-forward-enabled').checked = true;
+                wzToggleForwardingOptions();
+                document.getElementById('wz-forward-email-target').value = s.forward_email_target || '';
+                document.getElementById('wz-forward-timing').value = s.forward_timing || 'AFTER_ANALYSIS';
+            } else {
+                document.getElementById('wz-forward-enabled').checked = false;
+                wzToggleForwardingOptions();
+            }
+            alert(`Monitoreo "${s.script_name}" cargado en el Creador de Monitoreo para edición.`);
+        }
+
+        async function clearAuditLogsData() {
+            if (!confirm("¿Estás seguro de que deseas borrar TODOS los registros de ejecuciones y auditorías?")) return;
+            try {
+                const res = await fetch('/api/audit/clear', { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    alert("Registros de ejecuciones eliminados correctamente.");
+                    loadExecutionLogs();
+                } else {
+                    alert("Error eliminando registros de auditoría.");
+                }
+            } catch (err) {
+                alert(`Error de red: ${err}`);
+            }
+        }
+
+        async function clearSystemLogsData() {
+            if (!confirm("¿Estás seguro de que deseas vaciar la consola de logs del sistema?")) return;
+            try {
+                const res = await fetch('/api/logs/system/clear', { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    loadSystemLogs();
+                }
+            } catch (err) {
+                alert(`Error de red: ${err}`);
+            }
+        }
+
+        // Cargar y mostrar los Logs del Sistema / Demonio MAPI en Vivo
+        let logsTimer = null;
+        async function loadSystemLogs() {
+            const container = document.getElementById('system-logs-container');
+            try {
+                const res = await fetch('/api/logs/system');
+                const data = await res.json();
+                const logs = data.logs || [];
+                
+                if (logs.length === 0) {
+                    container.innerHTML = '<div class="text-slate-500 text-center py-4">No hay logs registrados aún.</div>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                logs.forEach(line => {
+                    let color = 'text-slate-300';
+                    if (line.includes('[ERROR]')) color = 'text-rose-400 font-bold';
+                    else if (line.includes('[WARNING]')) color = 'text-amber-300 font-semibold';
+                    else if (line.includes('[INFO]')) color = 'text-indigo-300';
+                    else if (line.includes('POLLER') || line.includes('ITEM_ADD')) color = 'text-emerald-400 font-bold';
+
+                    container.innerHTML += `<div class="${color}">${line}</div>`;
+                });
+
+                // Auto-scroll al final
+                container.scrollTop = container.scrollHeight;
+            } catch (err) {
+                container.innerHTML = `<div class="text-rose-400 text-center py-4">Error cargando logs del sistema: ${err}</div>`;
+            }
+        }
+
+        // Timer de auto-refresco de la pestaña LOGS
+        setInterval(() => {
+            const autoRefresh = document.getElementById('logs-auto-refresh');
+            const logsTab = document.getElementById('tab-logs');
+            if (autoRefresh && autoRefresh.checked && logsTab && logsTab.classList.contains('active')) {
+                loadSystemLogs();
+            }
+        }, 3000);
+
+        // Timer de auto-refresco de telemetría de Microservicios cada 4 segundos
+        setInterval(() => {
+            const dashboardTab = document.getElementById('tab-dashboard');
+            if (dashboardTab && dashboardTab.classList.contains('active')) {
+                loadMicroservicesStatus();
+            }
+        }, 4000);
+
+        // Cargar inicio por defecto y precargar cuentas de monitoreo
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDashboardData();
+            wzInitWizard();
+        });
+        loadDashboardData();
+        wzInitWizard();
+    </script>
+</body>
+</html>

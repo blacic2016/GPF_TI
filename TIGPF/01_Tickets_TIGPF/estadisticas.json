@@ -1,0 +1,230 @@
+[
+    {
+        "fecha_ejecucion": "2026-09-15 09:00:00",
+        "estado": "EXITO",
+        "detalle": "Ejecución única independiente con métricas detalladas de filas BDD",
+        "resumen_estadisticas": {
+            "correos_totales": 0,
+            "correos_almacenados": 0,
+            "correos_no_almacenados": 0,
+            "correos almacenados- no cumple con requisitos": 0,
+            "alarmas_creadas": 0,
+            "correos_precreados": 0,
+            "filas_adjuntadas_bdd": 0,
+            "filas_analizadas_bdd": 0,
+            "filas_duplicadas_bdd": 0
+        }
+    },
+    {
+        "fecha_ejecucion": "2026-09-15 09:01:56",
+        "estado": "EXITO",
+        "detalle": "Ejecución completada exitosamente sin errores no controlados",
+        "resumen_estadisticas": {
+            "correos_totales": 2,
+            "correos_almacenados": 0,
+            "correos_no_almacenados": 0,
+            "correos almacenados- no cumple con requisitos": 1,
+            "alarmas_creadas": 0,
+            "correos_precreados": 0,
+            "filas_adjuntadas_bdd": 0,
+            "filas_analizadas_bdd": 17,
+            "filas_duplicadas_bdd": 17
+        }
+    },
+    {
+        "fecha_ejecucion": "2026-09-15 09:50:19",
+        "estado": "EXITO",
+        "detalle": "Prueba de verificacion",
+        "resumen_estadisticas": {
+            "correos_totales": 5,
+            "correos_almacenados": 1,
+            "correos_no_almacenados": 0,
+            "correos_no_cumplen_requisitos": 4,
+            "filas_adjuntadas_bdd": 9,
+            "filas_analizadas_bdd": 9,
+            "filas_duplicadas_bdd": 9
+        }
+    },
+    {
+        "fecha_ejecucion": "2026-09-15 09:53:43",
+        "estado": "EXITO",
+        "detalle": "Ejecucion completada exitosamente sin errores",
+        "resumen_estadisticas": {
+            "correos_totales": 1,
+            "correos_almacenados": 1,
+            "correos_no_almacenados": 0,
+            "correos_no_cumplen_requisitos": 0,
+            "filas_adjuntadas_bdd": 9,
+            "filas_analizadas_bdd": 9,
+            "filas_duplicadas_bdd": 0
+        }
+    },
+    {
+        "fecha_ejecucion": "2026-09-17 15:30:53",
+        "estado": "EXITO",
+        "detalle": "Ejecucion completada exitosamente sin errores",
+        "resumen_estadisticas": {
+            "correos_totales": 2,
+            "correos_almacenados": 2,
+            "correos_no_almacenados": 0,
+            "correos_no_cumplen_requisitos": 0,
+            "filas_adjuntadas_bdd": 18,
+            "filas_analizadas_bdd": 18,
+            "filas_duplicadas_bdd": 0
+        }
+    },
+    {
+        "fecha_ejecucion": "2026-09-17 15:36:07",
+        "estado": "EXITO",
+        "detalle": "Ejecucion completada exitosamente sin errores",
+        "resumen_estadisticas": {
+            "correos_totales": 2,
+            "correos_almacenados": 0,
+            "correos_no_almacenados": 0,
+            "correos_no_cumplen_requisitos": 0,
+            "filas_adjuntadas_bdd": 0,
+            "filas_analizadas_bdd": 18,
+            "filas_duplicadas_bdd": 18
+        }
+    },
+    {
+        "fecha_ejecucion": "2026-09-17 15:44:35",
+        "estado": "EXITO",
+        "detalle": "Ejecucion completada exitosamente sin errores",
+        "resumen_estadisticas": {
+            "correos_totales": 2,
+            "correos_almacenados": 2,
+            "correos_no_almacenados": 0,
+            "correos_no_cumplen_requisitos": 0,
+            "filas_adjuntadas_bdd": 18,
+            "filas_analizadas_bdd": 18,
+            "filas_duplicadas_bdd": 0
+        }
+    },
+    {
+        "fecha_ejecucion": "2026-09-29 14:09:46",
+        "estado": "EXITO",
+        "detalle": "Ejecucion completada exitosamente sin errores",
+        "resumen_estadisticas": {
+            "correos_totales": 2,
+            "correos_almacenados": 0,
+            "correos_no_almacenados": 0,
+            "correos_no_cumplen_requisitos": 0,
+            "filas_adjuntadas_bdd": 0,
+            "filas_analizadas_bdd": 18,
+            "filas_duplicadas_bdd": 18
+        }
+    },
+    {
+        "fecha_ejecucion": "2026-09-29 14:17:01",
+        "estado": "EXITO",
+        "detalle": "Ejecucion completada exitosamente sin errores",
+        "resumen_estadisticas": {
+            "correos_totales": 11,
+            "correos_almacenados": 11,
+            "correos_no_almacenados": 0,
+            "correos_no_cumplen_requisitos": 0,
+            "filas_adjuntadas_bdd": 104,
+            "filas_analizadas_bdd": 104,
+            "filas_duplicadas_bdd": 0
+        }
+    },
+    {
+        "fecha_ejecucion": "2026-09-29 23:08:21",
+        "estado": "EXITO",
+        "detalle": "Ejecucion completada exitosamente sin errores",
+        "resumen_estadisticas": {
+            "correos_totales": 1,
+            "correos_almacenados": 1,
+            "correos_no_almacenados": 0,
+            "correos_no_cumplen_requisitos": 0,
+            "filas_adjuntadas_bdd": 8,
+            "filas_analizadas_bdd": 8,
+            "filas_duplicadas_bdd": 0
+        }
+    },
+    {
+        "fecha_ejecucion": "2026-09-30 23:08:48",
+        "estado": "EXITO",
+        "detalle": "Ejecucion completada exitosamente sin errores",
+        "resumen_estadisticas": {
+            "correos_totales": 1,
+            "correos_almacenados": 1,
+            "correos_no_almacenados": 0,
+            "correos_no_cumplen_requisitos": 0,
+            "filas_adjuntadas_bdd": 9,
+            "filas_analizadas_bdd": 9,
+            "filas_duplicadas_bdd": 0
+        }
+    },
+    {
+        "fecha_ejecucion": "2026-10-01 23:57:03",
+        "estado": "EXITO",
+        "detalle": "Ejecucion completada exitosamente sin errores",
+        "resumen_estadisticas": {
+            "correos_totales": 1,
+            "correos_almacenados": 1,
+            "correos_no_almacenados": 0,
+            "correos_no_cumplen_requisitos": 0,
+            "filas_adjuntadas_bdd": 9,
+            "filas_analizadas_bdd": 9,
+            "filas_duplicadas_bdd": 0
+        }
+    },
+    {
+        "fecha_ejecucion": "2026-10-02 23:58:11",
+        "estado": "EXITO",
+        "detalle": "Ejecucion completada exitosamente sin errores",
+        "resumen_estadisticas": {
+            "correos_totales": 1,
+            "correos_almacenados": 1,
+            "correos_no_almacenados": 0,
+            "correos_no_cumplen_requisitos": 0,
+            "filas_adjuntadas_bdd": 10,
+            "filas_analizadas_bdd": 10,
+            "filas_duplicadas_bdd": 0
+        }
+    },
+    {
+        "fecha_ejecucion": "2026-10-03 23:59:18",
+        "estado": "EXITO",
+        "detalle": "Ejecucion completada exitosamente sin errores",
+        "resumen_estadisticas": {
+            "correos_totales": 1,
+            "correos_almacenados": 1,
+            "correos_no_almacenados": 0,
+            "correos_no_cumplen_requisitos": 0,
+            "filas_adjuntadas_bdd": 10,
+            "filas_analizadas_bdd": 10,
+            "filas_duplicadas_bdd": 0
+        }
+    },
+    {
+        "fecha_ejecucion": "2026-10-05 00:00:25",
+        "estado": "EXITO",
+        "detalle": "Ejecucion completada exitosamente sin errores",
+        "resumen_estadisticas": {
+            "correos_totales": 1,
+            "correos_almacenados": 1,
+            "correos_no_almacenados": 0,
+            "correos_no_cumplen_requisitos": 0,
+            "filas_adjuntadas_bdd": 10,
+            "filas_analizadas_bdd": 10,
+            "filas_duplicadas_bdd": 0
+        }
+    },
+    {
+        "fecha_ejecucion": "2026-10-05 23:01:30",
+        "estado": "EXITO",
+        "detalle": "Ejecucion completada exitosamente sin errores",
+        "resumen_estadisticas": {
+            "correos_totales": 1,
+            "correos_almacenados": 1,
+            "correos_no_almacenados": 0,
+            "correos_no_cumplen_requisitos": 0,
+            "filas_adjuntadas_bdd": 10,
+            "filas_analizadas_bdd": 10,
+            "filas_duplicadas_bdd": 0
+        }
+    }
+]

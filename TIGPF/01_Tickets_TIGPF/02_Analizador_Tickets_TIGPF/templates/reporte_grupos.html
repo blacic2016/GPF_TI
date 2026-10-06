@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Casos por Grupos - Detalle | TI GPF</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    .excel-report-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: rgba(17, 24, 39, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      font-size: 14px;
+    }
+    .excel-report-table th {
+      background: rgba(30, 41, 59, 0.95);
+      color: #94a3b8;
+      font-weight: 700;
+      padding: 10px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: left;
+    }
+    .excel-report-table th.center {
+      text-align: center;
+    }
+    .excel-report-table th.right {
+      text-align: right;
+    }
+    .excel-report-table td {
+      padding: 10px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: #f8fafc;
+    }
+    .excel-report-table td.right {
+      text-align: right;
+    }
+    .excel-report-table tr.group-subtotal {
+      background: rgba(51, 65, 85, 0.5);
+      font-weight: 800;
+    }
+    .excel-report-table tr.grand-total {
+      background: rgba(30, 58, 138, 0.6);
+      font-weight: 900;
+      font-size: 15px;
+      border-top: 2px solid var(--accent-blue);
+    }
+    .group-cell {
+      font-weight: 700;
+      color: #93c5fd;
+      vertical-align: top;
+    }
+    .time-picker-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 8px 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--glass-border);
+    }
+    .time-picker-box input[type="date"] {
+      background: rgba(17, 24, 39, 0.8);
+      border: 1px solid var(--glass-border);
+      color: #ffffff;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      outline: none;
+    }
+    .time-picker-box input[type="date"]:focus {
+      border-color: var(--accent-blue);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- LATERAL SIDEBAR NAVIGATION -->
+    <aside id="main-sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <div class="sidebar-logo">🏢</div>
+          <div class="sidebar-titles">
+            <h3>TI_GPF</h3>
+            <p>Tickets & Operaciones</p>
+          </div>
+        </div>
+        <button id="btn-close-sidebar" class="sidebar-close-btn" title="Ocultar menú lateral">✕</button>
+      </div>
+
+      <div class="sidebar-section-title">NAVEGACIÓN PRINCIPAL</div>
+      
+      <nav class="sidebar-nav">
+        <a href="/" class="sidebar-nav-item">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">Dashboard General</span>
+        </a>
+        <a href="/carga_trabajo" class="sidebar-nav-item">
+          <span class="nav-icon">⚖️</span>
+          <span class="nav-label">Carga de Trabajo</span>
+        </a>
+        <a href="/reporte_grupos" class="sidebar-nav-item active">
+          <span class="nav-icon">📑</span>
+          <span class="nav-label">Casos por Grupos</span>
+        </a>
+        <a href="/historial" class="sidebar-nav-item">
+          <span class="nav-icon">🕒</span>
+          <span class="nav-label">Historial de Ingesta</span>
+        </a>
+        <a href="/standby" class="sidebar-nav-item">
+          <span class="nav-icon">🛡️</span>
+          <span class="nav-label">Turnos de Standby</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-status-box">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="pulse-dot"></div>
+            <span style="font-weight: 700; font-size: 12px; color: var(--text-primary);">Monitoreo Activo</span>
+          </div>
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Ejecución periódica 24/7</p>
+        </div>
+      </div>
+    </aside>
+
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- MAIN CONTENT WRAPPER -->
+    <div class="main-wrapper">
+      <div class="dashboard-container">
+        
+        <!-- HEADER WITH NAVIGATION TOGGLE -->
+        <header>
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <button id="btn-toggle-menu" class="menu-toggle-btn" title="Mostrar/Ocultar Menú Lateral">
+              <span class="menu-icon">☰</span>
+              <span class="menu-text">Menú</span>
+            </button>
+            <div class="brand">
+              <div class="brand-icon">📑</div>
+              <div>
+                <h1>Reporte Casos por Grupos — Detalle</h1>
+                <p>Consolidado Estructurado por Rango de Fechas (Time Picker) — TI_GPF</p>
+              </div>
+            </div>
+          </div>
+        </header>
+
+    <!-- TIME PICKER & FILTER BAR -->
+    <section class="filter-bar">
+      
+      <!-- Date Range Picker -->
+      <div class="time-picker-box">
+        <span class="filter-label">📅 Rango de Fechas:</span>
+        <label style="font-size: 12px; color: var(--text-secondary);">Desde:</label>
+        <input type="date" id="fecha-inicio" />
+        <label style="font-size: 12px; color: var(--text-secondary);">Hasta:</label>
+        <input type="date" id="fecha-fin" />
+        <button id="btn-filtrar-fechas" class="tab-btn" style="background: var(--accent-blue); color: #fff;">🔍 Filtrar</button>
+      </div>
+
+      <!-- Quick Presets -->
+      <div class="filter-group">
+        <span class="filter-label">Accesos Rápidos:</span>
+        <div class="btn-tabs">
+          <button class="tab-btn active" data-preset="actual">📅 Hoy / Último Corte</button>
+          <button class="tab-btn" data-preset="todos">Histórico Completo</button>
+          <button class="tab-btn" data-preset="mes">Este Mes</button>
+          <button class="tab-btn" data-preset="semestre">Este Semestre</button>
+          <button class="tab-btn" data-preset="ano">Este Año</button>
+        </div>
+      </div>
+
+      <!-- Export Action -->
+      <div class="filter-group">
+        <button id="btn-exportar-excel" class="tab-btn" style="background: rgba(16, 185, 129, 0.2); border: 1px solid var(--status-green); color: var(--status-green);">📥 Exportar a Excel</button>
+      </div>
+
+    </section>
+
+    <!-- REPORT TABLE CARD -->
+    <div class="section-card" style="padding: 28px;">
+      
+      <div class="section-header" style="margin-bottom: 24px; text-align: center; flex-direction: column; gap: 4px;">
+        <h2 style="font-size: 26px; font-weight: 800; color: #ffffff;">Casos por Grupos - Detalle</h2>
+        <p style="font-size: 13px; color: var(--text-secondary);" id="rango-fechas-label">Cargando rango de fechas...</p>
+      </div>
+
+      <!-- MATCHING EXCEL REPORT TABLE STRUCTURE -->
+      <div class="table-container">
+        <table class="excel-report-table">
+          <thead>
+            <tr>
+              <th style="border: none; background: transparent;"></th>
+              <th style="border: none; background: transparent;"></th>
+              <th colspan="4" class="center" style="background: rgba(30, 41, 59, 0.8); color: #94a3b8; font-size: 13px;">
+                Ticket Count (Contar diferentes)
+              </th>
+            </tr>
+            <tr>
+              <th style="width: 25%;">Assign To Group</th>
+              <th style="width: 35%;">Assign To Individual</th>
+              <th class="right" style="width: 10%;">Pending</th>
+              <th class="right" style="width: 10%;">Queued</th>
+              <th class="right" style="width: 10%;">Resolved</th>
+              <th class="right" style="width: 10%;">Total</th>
+            </tr>
+          </thead>
+          <tbody id="reporte-tbody">
+            <tr>
+              <td colspan="6" class="loading-spinner">
+                <div class="spinner"></div>
+                Generando reporte de casos por grupos...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+      </div> <!-- dashboard-container -->
+    </div> <!-- main-wrapper -->
+  </div> <!-- app-layout -->
+
+  <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/reporte_grupos.js') }}"></script>
+</body>
+</html>

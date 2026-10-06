@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Historial de Sincronizaciones & Automatización | TI GPF</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* Scoped styles for Historial */
+    .terminal-box {
+      background: #0d1117;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      font-family: 'JetBrains Mono', Consolas, Monaco, monospace;
+      font-size: 13px;
+      color: #58a6ff;
+      max-height: 480px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.6;
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    .modal-content {
+      background: #111827;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: var(--radius-lg);
+      width: 90%;
+      max-width: 900px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+    }
+
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .btn-sync-now {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+    }
+
+    .btn-sync-now:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.5);
+    }
+
+    .btn-sync-now:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-action-small {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-primary);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-action-small:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- LATERAL SIDEBAR NAVIGATION -->
+    <aside id="main-sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <div class="sidebar-logo">🏢</div>
+          <div class="sidebar-titles">
+            <h3>TI_GPF</h3>
+            <p>Tickets & Operaciones</p>
+          </div>
+        </div>
+        <button id="btn-close-sidebar" class="sidebar-close-btn" title="Ocultar menú lateral">✕</button>
+      </div>
+
+      <div class="sidebar-section-title">NAVEGACIÓN PRINCIPAL</div>
+      
+      <nav class="sidebar-nav">
+        <a href="/" class="sidebar-nav-item">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">Dashboard General</span>
+        </a>
+        <a href="/carga_trabajo" class="sidebar-nav-item">
+          <span class="nav-icon">⚖️</span>
+          <span class="nav-label">Carga de Trabajo</span>
+        </a>
+        <a href="/reporte_grupos" class="sidebar-nav-item">
+          <span class="nav-icon">📑</span>
+          <span class="nav-label">Casos por Grupos</span>
+        </a>
+        <a href="/historial" class="sidebar-nav-item active">
+          <span class="nav-icon">🕒</span>
+          <span class="nav-label">Historial de Ingesta</span>
+        </a>
+        <a href="/standby" class="sidebar-nav-item">
+          <span class="nav-icon">🛡️</span>
+          <span class="nav-label">Turnos de Standby</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-status-box">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="pulse-dot"></div>
+            <span style="font-weight: 700; font-size: 12px; color: var(--text-primary);">Monitoreo Activo</span>
+          </div>
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Ejecución periódica 24/7</p>
+        </div>
+      </div>
+    </aside>
+
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- MAIN CONTENT WRAPPER -->
+    <div class="main-wrapper">
+      <div class="dashboard-container">
+        
+        <!-- HEADER WITH NAVIGATION TOGGLE -->
+        <header>
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <button id="btn-toggle-menu" class="menu-toggle-btn" title="Mostrar/Ocultar Menú Lateral">
+              <span class="menu-icon">☰</span>
+              <span class="menu-text">Menú</span>
+            </button>
+            <div class="brand">
+              <div class="brand-icon">🕒</div>
+              <div>
+                <h1>Historial de Sincronizaciones & Automatización</h1>
+                <p>Ejecución Periódica Horaria 24/7 y Monitoreo de Ingesta Outlook (00_GPF_PDC_mail.py)</p>
+              </div>
+            </div>
+          </div>
+          <div class="last-update">
+            <div class="pulse-dot"></div>
+            <span>Servicio: <strong id="service-status-badge" style="color: var(--status-green);">Activo (Cada 60 min)</strong></span>
+          </div>
+        </header>
+
+    <!-- KPI SUMMARY CARDS -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-title">Estado de Automatización</div>
+        <div class="kpi-value" style="font-size: 24px; color: var(--status-green);" id="kpi-scheduler-status">🟢 Cada 1 Hora (24/7)</div>
+        <div class="kpi-subtext" id="kpi-scheduler-next">Próxima corrida: Calculando...</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-title">Última Ejecución Realizada</div>
+        <div class="kpi-value" style="font-size: 20px;" id="kpi-last-run-date">Consultando...</div>
+        <div class="kpi-subtext" id="kpi-last-run-status">Estado: Evaluando</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-title">Ejecuciones Registradas</div>
+        <div class="kpi-value" id="kpi-total-runs">0</div>
+        <div class="kpi-subtext" id="kpi-runs-breakdown">0 exitosas | 0 errores</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-title">Duración Promedio</div>
+        <div class="kpi-value" id="kpi-avg-duration">0.0s</div>
+        <div class="kpi-subtext">Tiempo de análisis y descarga</div>
+      </div>
+    </section>
+
+    <!-- ACTION AND CONTROL BAR -->
+    <section class="filter-bar" style="justify-content: space-between;">
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <button id="btn-sync-manual" class="btn-sync-now">
+          <span id="sync-icon">▶️</span>
+          <span id="sync-text">Sincronizar Correos Ahora (Manual)</span>
+        </button>
+        <button id="btn-refresh-history" class="tab-btn" style="background: rgba(255,255,255,0.08);">
+          🔄 Actualizar Lista
+        </button>
+      </div>
+
+      <div style="display: flex; gap: 12px; align-items: center;">
+        <span class="filter-label">Filtrar Estado:</span>
+        <select id="filter-estado" class="select-input">
+          <option value="TODOS">Todos los Estados</option>
+          <option value="EXITO">Solo Exitosos</option>
+          <option value="ERROR">Solo Errores</option>
+          <option value="EN_PROCESO">En Proceso</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- EXECUTION HISTORY TABLE CARD -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title">
+          <span>📋</span> Registro Detallado de Corridas (Auditoría de Ingesta)
+        </div>
+        <span style="font-size: 13px; color: var(--text-secondary);" id="execution-count-label">Cargando registros...</span>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 70px;">ID</th>
+              <th>Fecha y Hora Inicio</th>
+              <th>Fecha Fin</th>
+              <th>Tipo</th>
+              <th>Duración</th>
+              <th>Estado</th>
+              <th>Archivos / Filas</th>
+              <th>Mensaje de Resultado</th>
+              <th style="text-align: center; width: 130px;">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="historial-tbody">
+            <tr>
+              <td colspan="9" class="loading-spinner">
+                <div class="spinner"></div>
+                Cargando historial de sincronizaciones...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      </div> <!-- dashboard-container -->
+    </div> <!-- main-wrapper -->
+  </div> <!-- app-layout -->
+
+  <!-- MODAL: DETALLE Y LOG COMPLETO DE EJECUCIÓN -->
+  <div class="modal-overlay" id="log-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 20px;">📄</span>
+          <div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #fff;" id="modal-title">Log de Ejecución #0</h3>
+            <p style="font-size: 12px; color: var(--text-secondary);" id="modal-subtitle">Fecha: Cargando...</p>
+          </div>
+        </div>
+        <button id="modal-close-btn" style="background: none; border: none; font-size: 20px; color: var(--text-muted); cursor: pointer;">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 12px; color: var(--text-secondary);">Salida estándar de consola (stdout/stderr):</span>
+          <button id="btn-copy-log" class="btn-action-small">📋 Copiar Log</button>
+        </div>
+        <pre class="terminal-box" id="modal-log-content">Cargando salida del proceso...</pre>
+      </div>
+      <div class="modal-footer">
+        <button id="modal-close-footer" class="tab-btn" style="background: rgba(255,255,255,0.08);">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/historial.js') }}"></script>
+</body>
+</html>

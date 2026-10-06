@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Análisis Individual: {{ nombre }} | TI GPF</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Chart.js local (previene bloqueo de Tracking Prevention / CDN) -->
+  <script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- LATERAL SIDEBAR NAVIGATION -->
+    <aside id="main-sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <div class="sidebar-logo">🏢</div>
+          <div class="sidebar-titles">
+            <h3>TI_GPF</h3>
+            <p>Tickets & Operaciones</p>
+          </div>
+        </div>
+        <button id="btn-close-sidebar" class="sidebar-close-btn" title="Ocultar menú lateral">✕</button>
+      </div>
+
+      <div class="sidebar-section-title">NAVEGACIÓN PRINCIPAL</div>
+      
+      <nav class="sidebar-nav">
+        <a href="/" class="sidebar-nav-item">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">Dashboard General</span>
+        </a>
+        <a href="/carga_trabajo" class="sidebar-nav-item">
+          <span class="nav-icon">⚖️</span>
+          <span class="nav-label">Carga de Trabajo</span>
+        </a>
+        <a href="/reporte_grupos" class="sidebar-nav-item">
+          <span class="nav-icon">📑</span>
+          <span class="nav-label">Casos por Grupos</span>
+        </a>
+        <a href="/historial" class="sidebar-nav-item">
+          <span class="nav-icon">🕒</span>
+          <span class="nav-label">Historial de Ingesta</span>
+        </a>
+        <a href="/standby" class="sidebar-nav-item">
+          <span class="nav-icon">🛡️</span>
+          <span class="nav-label">Turnos de Standby</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-status-box">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="pulse-dot"></div>
+            <span style="font-weight: 700; font-size: 12px; color: var(--text-primary);">Monitoreo Activo</span>
+          </div>
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Ejecución periódica 24/7</p>
+        </div>
+      </div>
+    </aside>
+
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- MAIN CONTENT WRAPPER -->
+    <div class="main-wrapper">
+      <div class="dashboard-container">
+        
+        <!-- HEADER WITH NAVIGATION TOGGLE -->
+        <header>
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <button id="btn-toggle-menu" class="menu-toggle-btn" title="Mostrar/Ocultar Menú Lateral">
+              <span class="menu-icon">☰</span>
+              <span class="menu-text">Menú</span>
+            </button>
+            <div class="brand">
+              <a href="/carga_trabajo" style="text-decoration: none; font-size: 22px;" title="Volver a Carga de Trabajo">⬅️</a>
+              <div>
+                <h1 id="analyst-page-title">Cargando Especialista...</h1>
+                <p id="analyst-page-group">Grupo: Cargando...</p>
+              </div>
+            </div>
+          </div>
+          <div class="last-update">
+            <span id="analyst-alert-badge" class="badge-threshold badge-green">🟢 Evaluando Umbrales...</span>
+          </div>
+        </header>
+
+    <!-- FILTER BAR -->
+    <section class="filter-bar">
+      <div class="filter-group">
+        <span class="filter-label">Temporalidad del Análisis:</span>
+        <div class="btn-tabs">
+          <button class="tab-btn active" data-temporalidad="todos">Todos</button>
+          <button class="tab-btn" data-temporalidad="dia">Día</button>
+          <button class="tab-btn" data-temporalidad="mes">Mes</button>
+          <button class="tab-btn" data-temporalidad="semestre">Semestre</button>
+          <button class="tab-btn" data-temporalidad="ano">Año</button>
+        </div>
+      </div>
+      <div class="filter-group">
+        <a href="/" class="tab-btn" style="background: rgba(59, 130, 246, 0.2); border: 1px solid var(--accent-blue); text-decoration: none;">🏠 Ir al Dashboard General</a>
+      </div>
+    </section>
+
+    <!-- KPI CARDS -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-title">Total Tickets Asignados</div>
+        <div class="kpi-value" id="kpi-ind-total">0</div>
+        <div class="kpi-subtext">Histórico acumulado</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-title">Tasa de Cierre Efectivo</div>
+        <div class="kpi-value" id="kpi-ind-cierre">0.0%</div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="kpi-ind-cierre-bar" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-title">Tickets Pendientes (Pending)</div>
+        <div class="kpi-value" id="kpi-ind-pending">0</div>
+        <div class="kpi-subtext" id="kpi-ind-pending-alert">Cargando estado...</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-title">Tickets Resueltos (Resolved)</div>
+        <div class="kpi-value" id="kpi-ind-resolved" style="color: var(--status-green);">0</div>
+        <div class="kpi-subtext">Resueltos satisfactoriamente</div>
+      </div>
+    </section>
+
+    <!-- CHARTS SECTION -->
+    <div class="content-grid" style="grid-template-columns: 2fr 1fr; margin-bottom: 28px;">
+      
+      <!-- LINE CHART: EVOLUCIÓN EN EL TIEMPO -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span>📈</span> Evolución Temporal de Tickets Resueltos vs. Pendientes vs. En Cola
+          </h2>
+        </div>
+        <div style="height: 320px; position: relative;">
+          <canvas id="chart-timeline"></canvas>
+        </div>
+      </div>
+
+      <!-- DOUGHNUT CHART: DISTRIBUCIÓN POR ESTADO -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span>📊</span> Distribución por Estado
+          </h2>
+        </div>
+        <div style="height: 320px; position: relative; display: flex; align-items: center; justify-content: center;">
+          <canvas id="chart-distribution"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- HISTORICAL TABLE -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span>📑</span> Histórico Detallado de Reportes Recibidos
+        </h2>
+        <span class="filter-label" id="records-count-label">0 Registros</span>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha de Recepción del Correo</th>
+              <th>ID Único Correo</th>
+              <th>Pendientes (Pending)</th>
+              <th>En Cola (Queued)</th>
+              <th>Resueltos (Resolved)</th>
+              <th>Total Tickets</th>
+              <th>% Efectividad</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody">
+            <tr>
+              <td colspan="7" class="loading-spinner">
+                <div class="spinner"></div>
+                Cargando historial del especialista...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+      </div> <!-- dashboard-container -->
+    </div> <!-- main-wrapper -->
+  </div> <!-- app-layout -->
+
+  <script>
+    const ANALYST_NAME = {{ nombre|tojson }};
+  </script>
+  <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/analista.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+{
+    "resumen_general": {
+        "fecha_analisis": "2026-09-29 14:09:26",
+        "total_reportes_procesados": 2,
+        "total_archivos_registrados": 3,
+        "total_tickets": 254,
+        "total_resueltos": 127,
+        "total_pendientes": 65,
+        "total_en_cola": 62,
+        "tasa_cierre_global_pct": 50.0
+    },
+    "desglose_grupos": [
+        {
+            "assign_to_group": "Especialistas Nivel 2",
+            "pending": 1,
+            "queued": 40,
+            "resolved": 106,
+            "total": 147,
+            "total_analistas": 5,
+            "tasa_cierre_pct": 72.11
+        },
+        {
+            "assign_to_group": "Soporte Terreno",
+            "pending": 64,
+            "queued": 22,
+            "resolved": 21,
+            "total": 107,
+            "total_analistas": 4,
+            "tasa_cierre_pct": 19.63
+        }
+    ],
+    "desglose_analistas": [
+        {
+            "assign_to_group": "Especialistas Nivel 2",
+            "assign_to_individual": "Toledo Orozco,Andres Arnaldo",
+            "pending": 0,
+            "queued": 8,
+            "resolved": 64,
+            "total": 72,
+            "tasa_cierre_pct": 88.89
+        },
+        {
+            "assign_to_group": "Soporte Terreno",
+            "assign_to_individual": "Condor Yaguari,Edwin David",
+            "pending": 39,
+            "queued": 15,
+            "resolved": 0,
+            "total": 54,
+            "tasa_cierre_pct": 0.0
+        },
+        {
+            "assign_to_group": "Especialistas Nivel 2",
+            "assign_to_individual": "Paredes Recalde,Marco Antonio",
+            "pending": 0,
+            "queued": 21,
+            "resolved": 22,
+            "total": 43,
+            "tasa_cierre_pct": 51.16
+        },
+        {
+            "assign_to_group": "Soporte Terreno",
+            "assign_to_individual": "Villena Mero,Johnny Alexander",
+            "pending": 18,
+            "queued": 7,
+            "resolved": 0,
+            "total": 25,
+            "tasa_cierre_pct": 0.0
+        },
+        {
+            "assign_to_group": "Soporte Terreno",
+            "assign_to_individual": "Alava Torres,Victor Alejandro",
+            "pending": 4,
+            "queued": 0,
+            "resolved": 18,
+            "total": 22,
+            "tasa_cierre_pct": 81.82
+        },
+        {
+            "assign_to_group": "Especialistas Nivel 2",
+            "assign_to_individual": "Romero Chafla,Carlos Augusto",
+            "pending": 1,
+            "queued": 6,
+            "resolved": 10,
+            "total": 17,
+            "tasa_cierre_pct": 58.82
+        },
+        {
+            "assign_to_group": "Especialistas Nivel 2",
+            "assign_to_individual": "Rosero Analuisa,Edison Enrique",
+            "pending": 0,
+            "queued": 3,
+            "resolved": 10,
+            "total": 13,
+            "tasa_cierre_pct": 76.92
+        },
+        {
+            "assign_to_group": "Soporte Terreno",
+            "assign_to_individual": "Andrango Logacho,Alex Marcelo",
+            "pending": 3,
+            "queued": 0,
+            "resolved": 3,
+            "total": 6,
+            "tasa_cierre_pct": 50.0
+        },
+        {
+            "assign_to_group": "Especialistas Nivel 2",
+            "assign_to_individual": "Jaramillo Villalba,Joao Paul",
+            "pending": 0,
+            "queued": 2,
+            "resolved": 0,
+            "total": 2,
+            "tasa_cierre_pct": 0.0
+        }
+    ],
+    "historico_reportes": [
+        {
+            "id_unico": 1789486304,
+            "fecha_recepcion": "2026-09-15 10:31:44",
+            "pending": 33,
+            "queued": 27,
+            "resolved": 69,
+            "total": 129,
+            "analistas_reportados": 9,
+            "tasa_cierre_pct": 53.49
+        },
+        {
+            "id_unico": 1789392859,
+            "fecha_recepcion": "2026-09-14 08:34:19",
+            "pending": 32,
+            "queued": 35,
+            "resolved": 58,
+            "total": 125,
+            "analistas_reportados": 9,
+            "tasa_cierre_pct": 46.4
+        }
+    ]
+}

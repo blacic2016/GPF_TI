@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Análisis de Carga de Trabajo | TI GPF</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Chart.js local (previene bloqueo de Tracking Prevention / CDN) -->
+  <script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- LATERAL SIDEBAR NAVIGATION -->
+    <aside id="main-sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <div class="sidebar-logo">🏢</div>
+          <div class="sidebar-titles">
+            <h3>TI_GPF</h3>
+            <p>Tickets & Operaciones</p>
+          </div>
+        </div>
+        <button id="btn-close-sidebar" class="sidebar-close-btn" title="Ocultar menú lateral">✕</button>
+      </div>
+
+      <div class="sidebar-section-title">NAVEGACIÓN PRINCIPAL</div>
+      
+      <nav class="sidebar-nav">
+        <a href="/" class="sidebar-nav-item">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">Dashboard General</span>
+        </a>
+        <a href="/carga_trabajo" class="sidebar-nav-item active">
+          <span class="nav-icon">⚖️</span>
+          <span class="nav-label">Carga de Trabajo</span>
+        </a>
+        <a href="/reporte_grupos" class="sidebar-nav-item">
+          <span class="nav-icon">📑</span>
+          <span class="nav-label">Casos por Grupos</span>
+        </a>
+        <a href="/historial" class="sidebar-nav-item">
+          <span class="nav-icon">🕒</span>
+          <span class="nav-label">Historial de Ingesta</span>
+        </a>
+        <a href="/standby" class="sidebar-nav-item">
+          <span class="nav-icon">🛡️</span>
+          <span class="nav-label">Turnos de Standby</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-status-box">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="pulse-dot"></div>
+            <span style="font-weight: 700; font-size: 12px; color: var(--text-primary);">Monitoreo Activo</span>
+          </div>
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Ejecución periódica 24/7</p>
+        </div>
+      </div>
+    </aside>
+
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- MAIN CONTENT WRAPPER -->
+    <div class="main-wrapper">
+      <div class="dashboard-container">
+        
+        <!-- HEADER WITH NAVIGATION TOGGLE -->
+        <header>
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <button id="btn-toggle-menu" class="menu-toggle-btn" title="Mostrar/Ocultar Menú Lateral">
+              <span class="menu-icon">☰</span>
+              <span class="menu-text">Menú</span>
+            </button>
+            <div class="brand">
+              <div class="brand-icon">⚖️</div>
+              <div>
+                <h1>Análisis de Carga de Trabajo (Workload)</h1>
+                <p>Evaluación de Carga Activa (Pendientes + En Cola) vs. Capacidad Resuelta en TI_GPF</p>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <span class="badge-threshold badge-green" id="badge-es-ultimo-header" style="font-size: 13px;">🟢 Último Archivo Cargado</span>
+            <span class="badge-threshold badge-blue" id="badge-corte-header" style="font-size: 13px;">📂 Archivo: <strong id="fecha-corte-badge" style="margin-left: 4px;">Cargando...</strong></span>
+          </div>
+        </header>
+
+    <!-- FILTER BAR -->
+    <section class="filter-bar">
+      <!-- Search Bar -->
+      <div class="filter-group" style="flex: 1; max-width: 260px;">
+        <span class="filter-label">🔍 Buscador:</span>
+        <input type="text" id="search-analyst" class="search-input" style="width: 100%;" placeholder="Buscar especialista, grupo..." />
+      </div>
+
+      <!-- Group Filter -->
+      <div class="filter-group">
+        <span class="filter-label">Grupo:</span>
+        <select id="group-filter" class="select-input">
+          <option value="todos">Todos los Grupos</option>
+        </select>
+      </div>
+
+      <!-- Selector de Archivo Cargado / Corte -->
+      <div class="filter-group" style="flex: 2; min-width: 320px;">
+        <span class="filter-label">📂 Archivo Cargado a Analizar:</span>
+        <select id="select-archivo-corte" class="select-input" style="width: 100%; font-weight: 600;" title="Seleccione el archivo procesado de tickets a analizar">
+          <option value="">Cargando archivos disponibles...</option>
+        </select>
+      </div>
+
+      <!-- Botón de Solo Último Archivo -->
+      <div class="filter-group">
+        <button id="btn-ultimo-archivo" class="tab-btn active" title="Cargar inmediatamente el último archivo Excel procesado" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.4)); border: 1px solid var(--status-green); color: #ffffff; font-weight: 700;">
+          ⚡ Solo Último Archivo
+        </button>
+      </div>
+
+      <div class="filter-group">
+        <button id="btn-refresh" class="tab-btn" style="background: rgba(255,255,255,0.08);">🔄 Actualizar</button>
+      </div>
+    </section>
+
+    <!-- BANNER DE ARCHIVO CARGADO ANALIZADO -->
+    <section id="banner-archivo-cargado" class="section-card" style="margin-bottom: 22px; padding: 18px 24px; background: linear-gradient(135deg, rgba(17, 24, 39, 0.9) 0%, rgba(30, 41, 59, 0.7) 100%); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: var(--radius-lg); box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div style="font-size: 32px; background: rgba(59, 130, 246, 0.15); width: 54px; height: 54px; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(59, 130, 246, 0.35);">
+            📂
+          </div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <span id="badge-archivo-status" class="badge-threshold badge-green" style="font-size: 12px; font-weight: 800;">🟢 Último Archivo Cargado</span>
+              <span id="badge-archivo-fecha-rec" class="badge-threshold badge-blue" style="font-size: 12px;">🕒 Recepción: Cargando...</span>
+            </div>
+            <h3 id="label-archivo-nombre" style="margin: 6px 0 2px 0; font-size: 17px; color: #ffffff; font-weight: 800; font-family: 'JetBrains Mono', Consolas, monospace;">
+              ReporteTicketsAnalistas_...xlsx
+            </h3>
+            <p id="label-archivo-asunto" style="font-size: 12px; color: var(--text-secondary); margin: 0;">
+              Asunto: Reporte Diario tickets Analistas
+            </p>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+          <div style="background: rgba(0,0,0,0.35); padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); text-align: center;">
+            <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Especialistas</div>
+            <div id="stat-archivo-analistas" style="font-size: 18px; font-weight: 800; color: #93c5fd;">0</div>
+          </div>
+          <div style="background: rgba(0,0,0,0.35); padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); text-align: center;">
+            <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Tickets en Archivo</div>
+            <div id="stat-archivo-tickets" style="font-size: 18px; font-weight: 800; color: #a7f3d0;">0</div>
+          </div>
+          <div style="background: rgba(0,0,0,0.35); padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); text-align: center;">
+            <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Carga Activa Total</div>
+            <div id="stat-archivo-activa" style="font-size: 18px; font-weight: 800; color: #fde047;">0</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BANNER DE CONTEXTO SEMANAL Y STANDBY -->
+    <section class="weekly-standby-banner" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.45) 0%, rgba(15, 23, 42, 0.8) 100%); border: 1px solid rgba(59, 130, 246, 0.35); border-radius: var(--radius-lg); padding: 18px 24px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <div style="font-size: 34px; background: rgba(59, 130, 246, 0.2); width: 54px; height: 54px; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(59, 130, 246, 0.4);">
+          🛡️
+        </div>
+        <div>
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <span class="badge-threshold badge-blue" id="banner-semana-label" style="font-size: 13px; font-weight: 700;">📅 Semana en Evaluación</span>
+            <span class="badge-standby-active" id="banner-standby-badge">🟢 Guardia Standby Activa</span>
+          </div>
+          <h3 id="banner-standby-analyst" style="margin: 6px 0 2px 0; font-size: 18px; color: #ffffff; font-weight: 800;">
+            Cargando especialista en turno de standby...
+          </h3>
+          <p id="banner-standby-detail" style="font-size: 12px; color: var(--text-secondary); margin: 0;">
+            Turno de guardia operativa para soporte e incidencias críticas
+          </p>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <a href="/standby" class="tab-btn" style="background: rgba(59, 130, 246, 0.25); border: 1px solid var(--accent-blue); color: #ffffff; text-decoration: none; padding: 10px 18px; border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;">
+          <span>🛡️ Módulo de Turnos de Standby</span>
+          <span style="font-size: 14px;">↗</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- WORKLOAD KPI CARDS -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-title">Carga Activa (Archivo Analizado)</div>
+        <div class="kpi-value" id="kpi-carga-activa" style="color: var(--status-yellow);">0</div>
+        <div class="kpi-subtext">Pendientes + En Cola en este corte</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-title">Tickets Pendientes (Pending)</div>
+        <div class="kpi-value" id="kpi-pending-total" style="color: var(--status-red);">0</div>
+        <div class="kpi-subtext" id="kpi-pending-status">Evaluando cuellos de botella...</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-title">Tickets En Cola (Queued)</div>
+        <div class="kpi-value" id="kpi-queued-total">0</div>
+        <div class="kpi-subtext">Asignados pendientes de inicio</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-title">Tickets Resueltos (Resolved)</div>
+        <div class="kpi-value" id="kpi-resolved-total" style="color: var(--status-green);">0</div>
+        <div class="kpi-subtext" id="kpi-desahogo-pct">0.0% capacidad resuelta</div>
+      </div>
+    </section>
+
+    <!-- BANNER DINÁMICO DE FLUJO Y RENDIMIENTO (Δ VS CORTE ANTERIOR) -->
+    <section id="banner-flujo-diferencial" class="section-card" style="margin-bottom: 24px; padding: 18px 24px; background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.8) 100%); border: 1px solid rgba(59, 130, 246, 0.35); border-radius: var(--radius-lg); box-shadow: var(--glass-shadow);">
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span style="font-size: 26px;">⚡</span>
+          <div>
+            <h3 style="font-size: 17px; font-weight: 800; color: #ffffff; margin: 0;">
+              Dinámica de Flujo & Rendimiento Operativo (Corte Actual vs. Anterior)
+            </h3>
+            <p id="label-comparativa-cortes" style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">
+              Comparando corte actual contra corte anterior
+            </p>
+          </div>
+        </div>
+        <div id="badge-balance-equipo" class="badge-threshold badge-blue" style="font-size: 13px; font-weight: 700;">
+          Calculando flujo neto...
+        </div>
+      </div>
+
+      <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); margin-bottom: 0;">
+        <div class="kpi-card" style="padding: 14px 18px; background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.25);">
+          <div class="kpi-title" style="color: #6ee7b7;">🚀 Velocidad de Desahogo</div>
+          <div class="kpi-value" id="kpi-dif-resueltos" style="color: #10b981; font-size: 26px;">+0</div>
+          <div class="kpi-subtext">Tickets cerrados en el periodo</div>
+        </div>
+
+        <div class="kpi-card" style="padding: 14px 18px; background: rgba(59, 130, 246, 0.08); border-color: rgba(59, 130, 246, 0.25);">
+          <div class="kpi-title" style="color: #93c5fd;">📥 Inflow de Nuevos</div>
+          <div class="kpi-value" id="kpi-dif-inflow" style="color: #60a5fa; font-size: 26px;">+0</div>
+          <div class="kpi-subtext">Tickets nuevos ingresados</div>
+        </div>
+
+        <div class="kpi-card" style="padding: 14px 18px; background: rgba(245, 158, 11, 0.08); border-color: rgba(245, 158, 11, 0.25);">
+          <div class="kpi-title" style="color: #fde047;">⚖️ Variación Neta de Carga</div>
+          <div class="kpi-value" id="kpi-dif-activa" style="color: #f59e0b; font-size: 26px;">+0</div>
+          <div class="kpi-subtext" id="kpi-dif-activa-sub">Balance neto de mesa</div>
+        </div>
+
+        <div class="kpi-card" style="padding: 14px 18px; background: rgba(239, 68, 68, 0.08); border-color: rgba(239, 68, 68, 0.25);">
+          <div class="kpi-title" style="color: #fca5a5;">⚠️ Alerta de Inacción / Atasco</div>
+          <div class="kpi-value" id="kpi-dif-alertas" style="color: #ef4444; font-size: 26px;">0</div>
+          <div class="kpi-subtext" id="kpi-dif-alertas-sub">Especialistas con riesgo</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN: MEDICIÓN GRÁFICA DE FLUJO DINÁMICO: CERRADOS VS VARIACIÓN DE CARGA -->
+    <section class="section-card" style="margin-bottom: 28px;">
+      <div class="section-header" style="flex-wrap: wrap; gap: 14px;">
+        <div>
+          <h2 class="section-title">
+            <span>📈</span> Medición Dinámica de Flujo: Tickets Cerrados en el Periodo vs. Variación de Carga
+          </h2>
+          <p style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
+            Comparativa directa de <strong>Tickets Resueltos en el Periodo (Velocidad)</strong> vs. <strong>Variación de Carga Activa (Atasco / Desahogo)</strong> y <strong>Carga Total Actual</strong>
+          </p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div class="threshold-legend" style="margin: 0; padding: 6px 14px; background: rgba(0,0,0,0.3); border-radius: 8px;">
+            <div class="legend-item"><span style="display:inline-block;width:12px;height:12px;background:#10b981;border-radius:2px;"></span> <span>Cerrados en Periodo (Δ Res)</span></div>
+            <div class="legend-item"><span style="display:inline-block;width:12px;height:12px;background:#f59e0b;border-radius:2px;"></span> <span>Variación Carga (Δ Act)</span></div>
+            <div class="legend-item"><span style="display:inline-block;width:12px;height:12px;background:#3b82f6;border-radius:2px;"></span> <span>Carga Activa Actual</span></div>
+          </div>
+        </div>
+      </div>
+      <div style="height: 350px; position: relative; margin-top: 14px;">
+        <canvas id="chart-workload-comparison"></canvas>
+      </div>
+    </section>
+
+    <!-- CHARTS SECTION: UN GRÁFICO DE BARRAS POR CADA ESTADO (PENDIENTES, ACTIVAS, RESUELTAS) -->
+    <section class="section-card" style="margin-bottom: 28px;">
+      <div class="section-header" style="flex-wrap: wrap; gap: 14px;">
+        <div>
+          <h2 class="section-title">
+            <span>📊</span> Análisis de Carga por Especialista — Un Gráfico por Estado
+          </h2>
+          <p style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
+            Comparativa individual de <strong>Tickets Pendientes</strong>, <strong>Carga Activa</strong> y <strong>Resueltos</strong> para cada persona
+          </p>
+        </div>
+        
+        <!-- Controles de Visualización de Gráficos -->
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <div class="btn-tabs" id="chart-view-mode-tabs">
+            <button class="tab-btn active" data-chart-view="all" title="Ver los 3 gráficos en simultáneo">👁️ Ver los 3 Estados</button>
+            <button class="tab-btn" data-chart-view="pending" title="Solo gráfico de pendientes">🔴 Pendientes</button>
+            <button class="tab-btn" data-chart-view="active" title="Solo gráfico de carga activa">🟡 Carga Activa</button>
+            <button class="tab-btn" data-chart-view="resolved" title="Solo gráfico de resueltos">🟢 Resueltos</button>
+          </div>
+
+          <div class="filter-group">
+            <span class="filter-label">Orden:</span>
+            <select id="select-chart-sort" class="select-input" style="padding: 6px 10px; font-size: 12px;">
+              <option value="desc">Mayor a Menor (Críticos 1°)</option>
+              <option value="asc">Menor a Mayor</option>
+              <option value="alpha">Alfabético (A-Z)</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <span class="filter-label">Mostrar:</span>
+            <select id="select-chart-limit" class="select-input" style="padding: 6px 10px; font-size: 12px;">
+              <option value="10">Top 10</option>
+              <option value="all">Todos</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cuadrícula de 3 Gráficos de Barras -->
+      <div id="triple-charts-grid" class="triple-charts-grid">
+        
+        <!-- GRÁFICO 1: PENDIENTES -->
+        <div class="chart-col-card" id="card-chart-pending">
+          <div class="chart-col-header">
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="badge-threshold badge-red" style="font-size: 11px;">🔴 PENDIENTES</span>
+                <span style="font-size: 13px; font-weight: 700; color: var(--text-primary);">Tickets Pendientes</span>
+              </div>
+              <span class="badge-bench" id="bench-pending-label" title="Promedio del equipo">Media: 0.0</span>
+            </div>
+            <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Cuellos de botella y riesgo de incumplimiento</p>
+          </div>
+          <div style="height: 320px; position: relative; margin-top: 10px;">
+            <canvas id="chart-bar-pending"></canvas>
+          </div>
+        </div>
+
+        <!-- GRÁFICO 2: ACTIVAS (PENDIENTES + EN COLA) -->
+        <div class="chart-col-card" id="card-chart-active">
+          <div class="chart-col-header">
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="badge-threshold badge-yellow" style="font-size: 11px;">🟡 ACTIVAS</span>
+                <span style="font-size: 13px; font-weight: 700; color: var(--text-primary);">Carga Activa (P + Q)</span>
+              </div>
+              <span class="badge-bench" id="bench-active-label" title="Promedio del equipo">Media: 0.0</span>
+            </div>
+            <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Volumen total en bandeja activa viva</p>
+          </div>
+          <div style="height: 320px; position: relative; margin-top: 10px;">
+            <canvas id="chart-bar-active"></canvas>
+          </div>
+        </div>
+
+        <!-- GRÁFICO 3: RESUELTAS -->
+        <div class="chart-col-card" id="card-chart-resolved">
+          <div class="chart-col-header">
+            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span class="badge-threshold badge-green" style="font-size: 11px;">🟢 RESUELTAS</span>
+                <span style="font-size: 13px; font-weight: 700; color: var(--text-primary);">Tickets Resueltos</span>
+              </div>
+              <span class="badge-bench" id="bench-resolved-label" title="Promedio del equipo">Media: 0.0</span>
+            </div>
+            <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Capacidad resolutiva y productividad</p>
+          </div>
+          <div style="height: 320px; position: relative; margin-top: 10px;">
+            <canvas id="chart-bar-resolved"></canvas>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECCIÓN: ANÁLISIS EN EL TIEMPO PARA CADA PERSONA (EVOLUCIÓN TEMPORAL) -->
+    <section class="section-card" style="margin-bottom: 28px;">
+      <div class="section-header" style="flex-wrap: wrap; gap: 14px;">
+        <div>
+          <h2 class="section-title">
+            <span>⏱️</span> Análisis en el Tiempo por Especialista (Evolución Temporal)
+          </h2>
+          <p style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
+            Evolución histórica fecha a fecha de <strong>Pendientes</strong>, <strong>Activas</strong> y <strong>Resueltas</strong> para la persona seleccionada
+          </p>
+        </div>
+
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+          <!-- Selector de Persona para el análisis en el tiempo -->
+          <div class="filter-group">
+            <span class="filter-label">👤 Seleccionar Especialista:</span>
+            <select id="select-analyst-timeline" class="select-input" style="min-width: 250px; font-weight: 600;">
+              <option value="__ALL__">🌐 Todo el Equipo (Consolidado)</option>
+            </select>
+          </div>
+
+          <!-- Tipo de Gráfico Temporal (Barras vs Líneas) -->
+          <div class="btn-tabs" id="timeline-chart-type-tabs">
+            <button class="tab-btn active" data-type="bar" title="Ver en barras por fecha">📊 Barras por Fecha</button>
+            <button class="tab-btn" data-type="line" title="Ver en líneas de tendencia">📈 Líneas de Tendencia</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tarjetas de Métricas Temporales del Especialista Seleccionado -->
+      <div class="timeline-kpis-grid" style="margin-bottom: 20px;">
+        <div class="timeline-kpi-box">
+          <div class="stat-label">Comportamiento / Tendencia de Carga</div>
+          <div class="stat-val" id="time-kpi-tendencia" style="display: flex; align-items: center; gap: 6px; font-size: 15px; margin-top: 6px;">
+            <span class="badge-threshold badge-blue">⚖️ Estable</span>
+          </div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;" id="time-kpi-tendencia-sub">Variación vs. corte anterior</div>
+        </div>
+
+        <div class="timeline-kpi-box">
+          <div class="stat-label">Promedio Diario Pendientes</div>
+          <div class="stat-val" id="time-kpi-avg-pending" style="color: var(--status-red); font-size: 22px; font-weight: 800; margin-top: 4px;">0.0</div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Tickets pendientes / reporte</div>
+        </div>
+
+        <div class="timeline-kpi-box">
+          <div class="stat-label">Pico Máximo Carga Activa</div>
+          <div class="stat-val" id="time-kpi-pico-active" style="color: var(--status-yellow); font-size: 22px; font-weight: 800; margin-top: 4px;">0</div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;" id="time-kpi-pico-date">Fecha: -</div>
+        </div>
+
+        <div class="timeline-kpi-box">
+          <div class="stat-label">Tasa de Desahogo Histórica</div>
+          <div class="stat-val" id="time-kpi-efectividad" style="color: var(--status-green); font-size: 22px; font-weight: 800; margin-top: 4px;">0.0%</div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Resueltos acumulados</div>
+        </div>
+      </div>
+
+      <!-- Gráfico de Evolución en el Tiempo -->
+      <div style="height: 340px; position: relative;">
+        <canvas id="chart-analyst-timeline"></canvas>
+      </div>
+    </section>
+
+    <!-- SECCIÓN: DIAGNÓSTICO INTELIGENTE & DISTRIBUCIÓN POR GRUPO -->
+    <div class="content-grid" style="grid-template-columns: 2fr 1fr; margin-bottom: 28px;">
+      
+      <!-- DIAGNÓSTICO Y RECOMENDACIONES DE BALANCE -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span>🧠</span> Diagnóstico Automatizado & Recomendaciones de Carga
+          </h2>
+          <span class="badge-threshold badge-blue" id="badge-diag-balance">Analizando...</span>
+        </div>
+
+        <div class="diagnosis-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px;">
+          
+          <!-- Cuadro 1: Riesgo / Cuello de Botella -->
+          <div class="diagnosis-box" style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-md); padding: 16px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <span style="font-size: 18px;">🚨</span>
+              <strong style="font-size: 13px; color: #ff8080;">Foco de Atención / Mayor Pendiente</strong>
+            </div>
+            <div id="diag-top-pending-name" style="font-size: 15px; font-weight: 700; color: #ffffff;">-</div>
+            <div id="diag-top-pending-desc" style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">-</div>
+          </div>
+
+          <!-- Cuadro 2: Mayor Volumen Activo -->
+          <div class="diagnosis-box" style="background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: var(--radius-md); padding: 16px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <span style="font-size: 18px;">⚡</span>
+              <strong style="font-size: 13px; color: #fcd34d;">Mayor Carga Viva en Bandeja</strong>
+            </div>
+            <div id="diag-top-active-name" style="font-size: 15px; font-weight: 700; color: #ffffff;">-</div>
+            <div id="diag-top-active-desc" style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">-</div>
+          </div>
+
+          <!-- Cuadro 3: Líder de Desahogo -->
+          <div class="diagnosis-box" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-md); padding: 16px;">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <span style="font-size: 18px;">🏆</span>
+              <strong style="font-size: 13px; color: #6ee7b7;">Mayor Capacidad de Resolución</strong>
+            </div>
+            <div id="diag-top-resolved-name" style="font-size: 15px; font-weight: 700; color: #ffffff;">-</div>
+            <div id="diag-top-resolved-desc" style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">-</div>
+          </div>
+
+        </div>
+
+        <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+          <div style="font-size: 13px; color: var(--text-secondary);" id="diag-balance-message">
+            Evaluando distribución entre analistas...
+          </div>
+          <button id="btn-export-csv" class="tab-btn" style="background: rgba(59, 130, 246, 0.2); border: 1px solid var(--accent-blue); display: inline-flex; align-items: center; gap: 6px;">
+            📥 Exportar Matriz a CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- DISTRIBUCIÓN POR GRUPO -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span>🏢</span> Carga Activa por Grupo
+          </h2>
+        </div>
+        <div style="height: 280px; position: relative; display: flex; align-items: center; justify-content: center;">
+          <canvas id="chart-group-workload"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- WORKLOAD TABLE -->
+    <div class="section-card">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">
+            <span>⚖️</span> Matriz Detallada de Carga de Trabajo por Especialista
+          </h2>
+          <p style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
+            Datos del archivo procesado: <strong id="table-archivo-sub" style="color: var(--accent-cyan); font-family: 'JetBrains Mono', monospace;">Último Corte</strong>
+          </p>
+        </div>
+        <span class="filter-label" id="workload-count-label">0 Especialistas</span>
+      </div>
+
+      <!-- LEGEND -->
+      <div class="threshold-legend">
+        <div class="legend-item">
+          <span class="badge-threshold badge-red">🔴 Sobrecargado</span>
+          <span>Pendientes > 15 ó Carga Activa ≥ 25</span>
+        </div>
+        <div class="legend-item">
+          <span class="badge-threshold badge-yellow">🟡 Carga Moderada</span>
+          <span>Pendientes 10-14 ó Carga Activa 10-24</span>
+        </div>
+        <div class="legend-item">
+          <span class="badge-threshold badge-green">🟢 Balanceado</span>
+          <span>Carga Activa < 10</span>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th class="sortable" data-sort="assign_to_individual">Especialista / Analista <span class="sort-icon">⇅</span></th>
+              <th class="sortable" data-sort="assign_to_group">Grupo <span class="sort-icon">⇅</span></th>
+              <th class="sortable" data-sort="u_carga_activa" title="Carga Activa (Pendientes + En Cola) en el corte actual y su variación vs corte anterior">Carga Activa (Δ vs Ayer) <span class="sort-icon">⇅</span></th>
+              <th class="sortable" data-sort="u_pending" title="Tickets pendientes actuales">Pendientes <span class="sort-icon">⇅</span></th>
+              <th class="sortable" data-sort="diff_resolved" title="Tickets resueltos/cerrados entre el corte anterior y el actual (Velocidad de desahogo)">Δ Cerrados en Periodo <span class="sort-icon">⇅</span></th>
+              <th class="sortable" data-sort="diff_activa" title="Variación neta de carga activa entre cortes (Acumulación o Desahogo)">Δ Flujo Neto <span class="sort-icon">⇅</span></th>
+              <th class="sortable" data-sort="estado_flujo" title="Diagnóstico dinámico de flujo operacional">Diagnóstico de Flujo <span class="sort-icon">⇅</span></th>
+              <th class="sortable" data-sort="w_resolved" title="Tickets resueltos en la semana">Resueltos Semana <span class="sort-icon">⇅</span></th>
+              <th class="sortable" data-sort="indice_saturacion_pct" title="Medición Gráfica de Saturación (0 - 100%)">Medición Saturación <span class="sort-icon">⇅</span></th>
+              <th style="min-width: 270px;">📝 Observaciones del Supervisor</th>
+            </tr>
+          </thead>
+          <tbody id="workload-tbody">
+            <tr>
+              <td colspan="10" class="loading-spinner">
+                <div class="spinner"></div>
+                Cargando matriz de carga de trabajo basada en último dato y semana...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+      </div> <!-- dashboard-container -->
+    </div> <!-- main-wrapper -->
+  </div> <!-- app-layout -->
+
+  <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/carga_trabajo.js') }}?v=2.2"></script>
+</body>
+</html>

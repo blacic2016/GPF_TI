@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Turnos de Standby / Guardias Operativas | TI GPF</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- LATERAL SIDEBAR NAVIGATION -->
+    <aside id="main-sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <div class="sidebar-logo">🏢</div>
+          <div class="sidebar-titles">
+            <h3>TI_GPF</h3>
+            <p>Tickets & Operaciones</p>
+          </div>
+        </div>
+        <button id="btn-close-sidebar" class="sidebar-close-btn" title="Ocultar menú lateral">✕</button>
+      </div>
+
+      <div class="sidebar-section-title">NAVEGACIÓN PRINCIPAL</div>
+      
+      <nav class="sidebar-nav">
+        <a href="/" class="sidebar-nav-item">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">Dashboard General</span>
+        </a>
+        <a href="/carga_trabajo" class="sidebar-nav-item">
+          <span class="nav-icon">⚖️</span>
+          <span class="nav-label">Carga de Trabajo</span>
+        </a>
+        <a href="/reporte_grupos" class="sidebar-nav-item">
+          <span class="nav-icon">📑</span>
+          <span class="nav-label">Casos por Grupos</span>
+        </a>
+        <a href="/historial" class="sidebar-nav-item">
+          <span class="nav-icon">🕒</span>
+          <span class="nav-label">Historial de Ingesta</span>
+        </a>
+        <a href="/standby" class="sidebar-nav-item active">
+          <span class="nav-icon">🛡️</span>
+          <span class="nav-label">Turnos de Standby</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-status-box">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="pulse-dot"></div>
+            <span style="font-weight: 700; font-size: 12px; color: var(--text-primary);">Monitoreo Activo</span>
+          </div>
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Guardias TI y Soporte 24/7</p>
+        </div>
+      </div>
+    </aside>
+
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- MAIN CONTENT WRAPPER -->
+    <div class="main-wrapper">
+      <div class="dashboard-container">
+        
+        <!-- HEADER WITH NAVIGATION TOGGLE -->
+        <header>
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <button id="btn-toggle-menu" class="menu-toggle-btn" title="Mostrar/Ocultar Menú Lateral">
+              <span class="menu-icon">☰</span>
+              <span class="menu-text">Menú</span>
+            </button>
+            <div class="brand">
+              <div class="brand-icon">🛡️</div>
+              <div>
+                <h1>Gestión y Asignación de Turnos de Standby</h1>
+                <p>Planificación de Guardias Operativas TI (Semanal, Diario, Mensual) y Disponibilidad 24/7</p>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <button id="btn-open-create-modal" class="tab-btn" style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #ffffff; border: 1px solid var(--accent-blue); padding: 10px 18px; border-radius: 8px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);">
+              <span>➕ Programar Nuevo Turno</span>
+            </button>
+          </div>
+        </header>
+
+        <!-- HERO CARD: ¿QUIÉN ESTÁ DE TURNO DE STANDBY ESTA SEMANA? -->
+        <section class="section-card" style="margin-bottom: 24px; background: linear-gradient(135deg, rgba(30, 58, 138, 0.45) 0%, rgba(15, 23, 42, 0.8) 100%); border: 1px solid rgba(59, 130, 246, 0.4); box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.6);">
+          <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+            <div style="display: flex; align-items: center; gap: 20px;">
+              <div style="font-size: 42px; background: rgba(59, 130, 246, 0.2); width: 70px; height: 70px; border-radius: 16px; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(59, 130, 246, 0.5); box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);">
+                🛡️
+              </div>
+              <div>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap;">
+                  <span class="badge-threshold badge-blue" style="font-size: 13px; font-weight: 800;">🔔 ESTA SEMANA EN STANDBY</span>
+                  <span id="hero-status-badge" class="badge-standby-active">🟢 ACTIVO EN GUARDIA</span>
+                  <span id="hero-periodo-badge" class="badge-threshold badge-yellow">Turno Semanal</span>
+                </div>
+                <h2 id="hero-analyst-name" style="margin: 0; font-size: 24px; color: #ffffff; font-weight: 800; letter-spacing: -0.5px;">
+                  Cargando responsable de guardia...
+                </h2>
+                <div id="hero-group-name" style="font-size: 14px; color: #93c5fd; font-weight: 600; margin-top: 4px;">
+                  Grupo Especialista TI
+                </div>
+              </div>
+            </div>
+
+            <!-- Datos de Contacto y Fechas -->
+            <div style="display: flex; gap: 18px; align-items: center; flex-wrap: wrap; background: rgba(0, 0, 0, 0.35); padding: 14px 20px; border-radius: var(--radius-md); border: 1px solid rgba(255, 255, 255, 0.08);">
+              <div>
+                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Vigencia del Turno</div>
+                <div id="hero-fechas" style="font-size: 14px; font-weight: 700; color: #ffffff; margin-top: 2px;">-</div>
+                <div id="hero-semana-anio" style="font-size: 12px; color: var(--text-secondary);">-</div>
+              </div>
+              <div style="width: 1px; height: 36px; background: rgba(255, 255, 255, 0.1);"></div>
+              <div>
+                <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Teléfono de Emergencia</div>
+                <div id="hero-telefono" style="font-size: 15px; font-weight: 800; color: #6ee7b7; margin-top: 2px;">
+                  -
+                </div>
+                <div id="hero-notas" style="font-size: 11px; color: var(--text-secondary); max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">-</div>
+              </div>
+              <div style="margin-left: 6px;">
+                <button id="hero-btn-edit" class="btn-action-small" style="background: rgba(59, 130, 246, 0.25); border-color: var(--accent-blue);">
+                  ✏️ Modificar
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- FILTER TOOLBAR -->
+        <section class="filter-bar">
+          <!-- Búsqueda rápida -->
+          <div class="filter-group" style="flex: 1; max-width: 260px;">
+            <span class="filter-label">🔍 Buscar:</span>
+            <input type="text" id="standby-search" class="search-input" style="width: 100%;" placeholder="Especialista, grupo, teléfono..." />
+          </div>
+
+          <!-- Tipo Periodo Tabs -->
+          <div class="filter-group">
+            <span class="filter-label">Tipo Periodo:</span>
+            <div class="btn-tabs" id="standby-tipo-tabs">
+              <button class="tab-btn active" data-tipo="TODOS">Todos</button>
+              <button class="tab-btn" data-tipo="SEMANAL">Semanal</button>
+              <button class="tab-btn" data-tipo="DIARIO">Diario</button>
+              <button class="tab-btn" data-tipo="MENSUAL">Mensual</button>
+            </div>
+          </div>
+
+          <!-- Filtro Año -->
+          <div class="filter-group">
+            <span class="filter-label">Año:</span>
+            <select id="standby-filter-anio" class="select-input">
+              <option value="TODOS">Todos los Años</option>
+              <option value="2026" selected>2026</option>
+              <option value="2027">2027</option>
+              <option value="2025">2025</option>
+            </select>
+          </div>
+
+          <!-- Filtro Mes -->
+          <div class="filter-group">
+            <span class="filter-label">Mes:</span>
+            <select id="standby-filter-mes" class="select-input">
+              <option value="TODOS">Todos los Meses</option>
+              <option value="1">Enero</option>
+              <option value="2">Febrero</option>
+              <option value="3">Marzo</option>
+              <option value="4">Abril</option>
+              <option value="5">Mayo</option>
+              <option value="6">Junio</option>
+              <option value="7">Julio</option>
+              <option value="8">Agosto</option>
+              <option value="9">Septiembre</option>
+              <option value="10">Octubre</option>
+              <option value="11">Noviembre</option>
+              <option value="12">Diciembre</option>
+            </select>
+          </div>
+
+          <!-- Filtro Estado -->
+          <div class="filter-group">
+            <span class="filter-label">Estado:</span>
+            <select id="standby-filter-estado" class="select-input">
+              <option value="TODOS">Todos los Estados</option>
+              <option value="ACTIVO">🟢 Activo</option>
+              <option value="PROGRAMADO">🔵 Programado</option>
+              <option value="COMPLETADO">⚪ Completado</option>
+              <option value="CANCELADO">🔴 Cancelado</option>
+            </select>
+          </div>
+
+          <div class="filter-group">
+            <button id="btn-refresh-standby" class="tab-btn" style="background: rgba(255,255,255,0.08);">🔄 Refrescar</button>
+          </div>
+        </section>
+
+        <!-- STANDBY TABLE CARD -->
+        <section class="section-card">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">
+                <span>📅</span> Cronograma General de Guardias & Turnos de Standby
+              </h2>
+              <p style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
+                Visualice, asigne, modifique o elimine turnos por Día, Semana o Mes
+              </p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="filter-label" id="standby-count-label">0 Turnos Registrados</span>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width: 70px;">Año</th>
+                  <th style="width: 80px;">Mes</th>
+                  <th style="width: 110px;">Semana #</th>
+                  <th style="min-width: 180px;">Rango de Fechas / Días</th>
+                  <th style="width: 100px;">Modalidad</th>
+                  <th style="min-width: 220px;">Especialista de Turno</th>
+                  <th style="min-width: 160px;">Grupo TI</th>
+                  <th style="min-width: 130px;">Teléfono Contacto</th>
+                  <th style="width: 120px;">Estado</th>
+                  <th style="min-width: 200px;">Notas / Cobertura</th>
+                  <th style="width: 140px; text-align: center;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="standby-tbody">
+                <tr>
+                  <td colspan="11" class="loading-spinner">
+                    <div class="spinner"></div>
+                    Consultando programación de standby...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </div> <!-- dashboard-container -->
+    </div> <!-- main-wrapper -->
+  </div> <!-- app-layout -->
+
+  <!-- MODAL: CREAR / EDITAR TURNO DE STANDBY -->
+  <div id="standby-modal" class="standby-modal">
+    <div class="standby-modal-card">
+      <div class="standby-modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 22px;">🛡️</span>
+          <h3 id="modal-title" style="margin: 0; font-size: 18px; color: #ffffff; font-weight: 700;">Programar Turno de Standby</h3>
+        </div>
+        <button id="modal-btn-close" class="sidebar-close-btn" style="display: flex;">✕</button>
+      </div>
+
+      <form id="standby-form">
+        <input type="hidden" id="form-turno-id" value="">
+        <div class="standby-modal-body">
+          
+          <!-- Fila 1: Especialista y Grupo -->
+          <div class="standby-form-row">
+            <div class="standby-form-group">
+              <label class="standby-form-label" for="form-analista">Especialista / Analista: *</label>
+              <select id="form-analista" class="standby-form-select" required>
+                <option value="">Seleccione especialista...</option>
+              </select>
+            </div>
+            <div class="standby-form-group">
+              <label class="standby-form-label" for="form-grupo">Grupo TI: *</label>
+              <input type="text" id="form-grupo" class="standby-form-input" placeholder="Ej: Soporte Terreno" required>
+            </div>
+          </div>
+
+          <!-- Fila 2: Tipo Periodo y Estado -->
+          <div class="standby-form-row">
+            <div class="standby-form-group">
+              <label class="standby-form-label" for="form-tipo-periodo">Tipo de Cobertura / Período: *</label>
+              <select id="form-tipo-periodo" class="standby-form-select" required>
+                <option value="SEMANAL" selected>Semanal (Lunes a Domingo)</option>
+                <option value="DIARIO">Diario (Guardia puntual)</option>
+                <option value="MENSUAL">Mensual (Mes completo)</option>
+              </select>
+            </div>
+            <div class="standby-form-group">
+              <label class="standby-form-label" for="form-estado">Estado del Turno: *</label>
+              <select id="form-estado" class="standby-form-select" required>
+                <option value="PROGRAMADO">🔵 Programado</option>
+                <option value="ACTIVO">🟢 Activo en Guardia</option>
+                <option value="COMPLETADO">⚪ Completado</option>
+                <option value="CANCELADO">🔴 Cancelado</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Fila 3: Fechas Inicio y Fin -->
+          <div class="standby-form-row">
+            <div class="standby-form-group">
+              <label class="standby-form-label" for="form-fecha-inicio">Fecha de Inicio: *</label>
+              <input type="date" id="form-fecha-inicio" class="standby-form-input" required>
+            </div>
+            <div class="standby-form-group">
+              <label class="standby-form-label" for="form-fecha-fin">Fecha de Fin: *</label>
+              <input type="date" id="form-fecha-fin" class="standby-form-input" required>
+            </div>
+          </div>
+
+          <!-- Fila 4: Semana del año, Días, Mes, Año (Calculados automáticamente) -->
+          <div class="standby-form-row" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+            <div class="standby-form-group">
+              <label class="standby-form-label" for="form-semana">Semana #:</label>
+              <input type="number" id="form-semana" class="standby-form-input" min="1" max="53">
+            </div>
+            <div class="standby-form-group">
+              <label class="standby-form-label" for="form-mes">Mes (1-12):</label>
+              <input type="number" id="form-mes" class="standby-form-input" min="1" max="12">
+            </div>
+            <div class="standby-form-group">
+              <label class="standby-form-label" for="form-anio">Año:</label>
+              <input type="number" id="form-anio" class="standby-form-input" min="2020" max="2035">
+            </div>
+            <div class="standby-form-group">
+              <label class="standby-form-label" for="form-dias">Días de Semana:</label>
+              <input type="text" id="form-dias" class="standby-form-input" placeholder="Lunes a Domingo">
+            </div>
+          </div>
+
+          <!-- Fila 5: Teléfono de Contacto -->
+          <div class="standby-form-group">
+            <label class="standby-form-label" for="form-telefono">Teléfono de Contacto / Móvil de Guardia:</label>
+            <input type="text" id="form-telefono" class="standby-form-input" placeholder="Ej: 0987654321">
+          </div>
+
+          <!-- Fila 6: Notas / Observaciones -->
+          <div class="standby-form-group">
+            <label class="standby-form-label" for="form-notas">Observaciones / Motivo de Guardia:</label>
+            <textarea id="form-notas" class="standby-form-input" rows="2" placeholder="Indicaciones operativas, reemplazo o cobertura especial..."></textarea>
+          </div>
+
+        </div>
+
+        <div class="standby-modal-footer">
+          <button type="button" id="modal-btn-cancel" class="tab-btn" style="background: rgba(255, 255, 255, 0.08);">Cancelar</button>
+          <button type="submit" id="modal-btn-save" class="tab-btn" style="background: var(--accent-blue); color: #ffffff; font-weight: 700;">💾 Guardar Turno</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/standby.js') }}"></script>
+</body>
+</html>

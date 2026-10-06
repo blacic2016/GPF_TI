@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Analítico de Tickets | TI GPF</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- LATERAL SIDEBAR NAVIGATION -->
+    <aside id="main-sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <div class="sidebar-logo">🏢</div>
+          <div class="sidebar-titles">
+            <h3>TI_GPF</h3>
+            <p>Tickets & Operaciones</p>
+          </div>
+        </div>
+        <button id="btn-close-sidebar" class="sidebar-close-btn" title="Ocultar menú lateral">✕</button>
+      </div>
+
+      <div class="sidebar-section-title">NAVEGACIÓN PRINCIPAL</div>
+      
+      <nav class="sidebar-nav">
+        <a href="/" class="sidebar-nav-item active">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">Dashboard General</span>
+        </a>
+        <a href="/carga_trabajo" class="sidebar-nav-item">
+          <span class="nav-icon">⚖️</span>
+          <span class="nav-label">Carga de Trabajo</span>
+        </a>
+        <a href="/reporte_grupos" class="sidebar-nav-item">
+          <span class="nav-icon">📑</span>
+          <span class="nav-label">Casos por Grupos</span>
+        </a>
+        <a href="/historial" class="sidebar-nav-item">
+          <span class="nav-icon">🕒</span>
+          <span class="nav-label">Historial de Ingesta</span>
+        </a>
+        <a href="/standby" class="sidebar-nav-item">
+          <span class="nav-icon">🛡️</span>
+          <span class="nav-label">Turnos de Standby</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-status-box">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div class="pulse-dot"></div>
+            <span style="font-weight: 700; font-size: 12px; color: var(--text-primary);">Monitoreo Activo</span>
+          </div>
+          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Ejecución periódica 24/7</p>
+        </div>
+      </div>
+    </aside>
+
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- MAIN CONTENT WRAPPER -->
+    <div class="main-wrapper">
+      <div class="dashboard-container">
+        
+        <!-- HEADER WITH NAVIGATION TOGGLE -->
+        <header>
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <button id="btn-toggle-menu" class="menu-toggle-btn" title="Mostrar/Ocultar Menú Lateral">
+              <span class="menu-icon">☰</span>
+              <span class="menu-text">Menú</span>
+            </button>
+            <div class="brand">
+              <div class="brand-icon">📊</div>
+              <div>
+                <h1>Monitoreo Analítico de Tickets</h1>
+                <p>Corporación GPF — Gestión de Incidencias & Especialistas (TI_GPF)</p>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span class="badge-threshold badge-blue" id="badge-corte-header" style="font-size: 13px;">📅 Corte Activo: <strong id="fecha-corte-badge" style="margin-left: 4px;">Cargando...</strong></span>
+            <div class="last-update">
+              <div class="pulse-dot"></div>
+              <span>Sincronización: <strong id="update-timestamp">Cargando...</strong></span>
+            </div>
+          </div>
+        </header>
+
+    <!-- FILTER BAR -->
+    <section class="filter-bar">
+      <!-- Search Input on Left -->
+      <div class="filter-group" style="flex: 1; max-width: 280px;">
+        <span class="filter-label">🔍 Buscador:</span>
+        <input type="text" id="search-analyst" class="search-input" style="width: 100%;" placeholder="Buscar analista, grupo..." />
+      </div>
+
+      <!-- Group Filter -->
+      <div class="filter-group">
+        <span class="filter-label">Grupo:</span>
+        <select id="group-filter" class="select-input">
+          <option value="todos">Todos los Grupos</option>
+        </select>
+      </div>
+
+      <!-- Temporalidad Tabs -->
+      <div class="filter-group">
+        <span class="filter-label">Temporalidad:</span>
+        <div class="btn-tabs">
+          <button class="tab-btn active" data-temporalidad="actual" title="Ver únicamente la fotografía del día de hoy o último corte recibido">📅 Fecha Actual / Último Corte</button>
+          <button class="tab-btn" data-temporalidad="todos" title="Acumulado histórico completo">Histórico Completo</button>
+          <button class="tab-btn" data-temporalidad="mes">Mes</button>
+          <button class="tab-btn" data-temporalidad="semestre">Semestre</button>
+          <button class="tab-btn" data-temporalidad="ano">Año</button>
+        </div>
+      </div>
+
+      <!-- Selector específico de corte de fecha -->
+      <div class="filter-group">
+        <span class="filter-label">📅 Fecha Específica:</span>
+        <select id="select-fecha-corte" class="select-input" title="Seleccione una fecha específica de reporte diario para analizar su corte individual">
+          <option value="">(Corte Actual Automático)</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <button id="btn-refresh" class="tab-btn" style="background: rgba(255,255,255,0.08);">🔄 Actualizar</button>
+      </div>
+    </section>
+
+    <!-- KPI CARDS -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-title">Tickets Totales Evaluados</div>
+        <div class="kpi-value" id="kpi-total-tickets">0</div>
+        <div class="kpi-subtext" id="kpi-reportes-count">0 reportes procesados</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-title">Tasa de Cierre / Efectividad</div>
+        <div class="kpi-value" id="kpi-cierre-pct">0.0%</div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="kpi-cierre-bar" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-title">Tickets Pendientes (Pending)</div>
+        <div class="kpi-value" id="kpi-pending">0</div>
+        <div class="kpi-subtext" id="kpi-pending-status">Evaluando estado de alertas...</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-title">Tickets En Cola (Queued)</div>
+        <div class="kpi-value" id="kpi-queued">0</div>
+        <div class="kpi-subtext">Asignados en cola activa</div>
+      </div>
+    </section>
+
+    <!-- MAIN CONTENT GRID -->
+    <div class="content-grid">
+      
+      <!-- LEFT SECTION: ANALYST PERFORMANCE TABLE -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span>👤</span> Rendimiento por Analista / Especialista
+          </h2>
+          <span class="filter-label" id="analyst-count-label">0 Analistas</span>
+        </div>
+
+        <!-- THRESHOLD LEGEND -->
+        <div class="threshold-legend">
+          <div class="legend-item">
+            <span class="badge-threshold badge-red">🔴 > 15 Pendientes</span>
+            <span>Alerta Crítica</span>
+          </div>
+          <div class="legend-item">
+            <span class="badge-threshold badge-yellow">🟡 10 - 14 Pendientes</span>
+            <span>Alerta Media</span>
+          </div>
+          <div class="legend-item">
+            <span class="badge-threshold badge-green">🟢 0 - 9 Pendientes</span>
+            <span>Óptimo / Verde</span>
+          </div>
+        </div>
+
+        <!-- TABLE CONTAINER -->
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th class="sortable" data-sort="assign_to_individual">Especialista / Analista <span class="sort-icon">⇅</span></th>
+                <th class="sortable" data-sort="assign_to_group">Grupo <span class="sort-icon">⇅</span></th>
+                <th class="sortable" data-sort="pending">Pendientes <span class="sort-icon">⇅</span></th>
+                <th class="sortable" data-sort="queued">En Cola <span class="sort-icon">⇅</span></th>
+                <th class="sortable" data-sort="resolved">Resueltos <span class="sort-icon">⇅</span></th>
+                <th class="sortable" data-sort="total">Total <span class="sort-icon">⇅</span></th>
+                <th class="sortable" data-sort="tasa_cierre_pct">% Efectividad <span class="sort-icon">⇅</span></th>
+              </tr>
+            </thead>
+            <tbody id="analysts-tbody">
+              <tr>
+                <td colspan="7" class="loading-spinner">
+                  <div class="spinner"></div>
+                  Cargando datos desde la base de datos TI_GPF...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- RIGHT SECTION: GROUP BREAKDOWN -->
+      <div class="section-card">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span>🏢</span> Desglose por Grupo
+          </h2>
+        </div>
+        <div class="group-list" id="group-list-container">
+          <div class="loading-spinner">
+            <div class="spinner"></div>
+            Cargando grupos...
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+      </div> <!-- dashboard-container -->
+    </div> <!-- main-wrapper -->
+  </div> <!-- app-layout -->
+
+  <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
